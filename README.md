@@ -28,3 +28,7 @@ In order to run this, you MUST use sudo/su due to the memory functions.  Once yo
 ```bash
 sudo ./src/horker
 ```
+
+### Screenshots
+![Screenshot 1](https://github.com/Teklad/resources/blob/master/csgo-horker/glow1.jpg?raw=true "One")
+![Screenshot 2](https://github.com/Teklad/resources/blob/master/csgo-horker/glow2.jpg?raw=true "Two")
