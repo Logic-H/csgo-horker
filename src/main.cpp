@@ -13,6 +13,7 @@
 #include <thread>
 
 #include <signal.h>
+#include <unistd.h>
 
 bool shouldQuit = false;
 
@@ -100,6 +101,10 @@ void exitHandle(int s)
 
 int main()
 {
+    if (getuid() != 0) {
+        LOG("This program must be ran as root.\n");
+        return 0;
+    }
     LOG("Attaching interrupt signal handler...");
     struct sigaction ccHandle;
     ccHandle.sa_handler = exitHandle;
@@ -113,6 +118,11 @@ int main()
     while (!mem.Attach() && !shouldQuit) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+
+    if (shouldQuit) {
+        return 0;
+    }
+
     LOG("Done.\n");
     LOG("Waiting for client library...");
     while (!shouldQuit) {
