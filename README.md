@@ -29,4 +29,5 @@ In order to run this, you MUST use sudo/su due to the memory functions.  Once yo
 sudo ./src/horker
 ```
 
-[Imgur](https://i.imgur.com/uMHveto.jpg)
+### Screenshots
+https://imgur.com/a/qLXVhr9
