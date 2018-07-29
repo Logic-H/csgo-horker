@@ -30,5 +30,5 @@ sudo ./src/horker
 ```
 
 ### Screenshots
-[Screenshot 1](https://github.com/Teklad/resources/blob/master/csgo-horker/glow1.jpg?raw=true "One")
-[Screenshot 2](https://github.com/Teklad/resources/blob/master/csgo-horker/glow2.jpg?raw=true "Two")
+![Screenshot 1](https://github.com/Teklad/resources/blob/master/csgo-horker/glow1.jpg?raw=true "One")
+![Screenshot 2](https://github.com/Teklad/resources/blob/master/csgo-horker/glow2.jpg?raw=true "Two")
