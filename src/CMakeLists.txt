@@ -9,5 +9,5 @@ target_link_libraries(horker
     Threads::Threads
 )
 
-set_property(TARGET csgo-dumpy PROPERTY CXX_STANDARD 11)
+set_property(TARGET horker PROPERTY CXX_STANDARD 11)
 
