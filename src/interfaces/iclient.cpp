@@ -1,76 +1,56 @@
 #include "iclient.h"
 #include "../patterns.h"
 #include "../sdk/cglowobjectmanager.h"
-#include <iostream>
-#include <unistd.h>
 
 IClient::IClient(MemoryManager &mem) : IBase(mem)
 {
-    constexpr char sMod[] = "client_panorama_client.so";
+    constexpr char sClient[] = "client_panorama_client.so";
 
-    uintptr_t localPlayerLea = mem.FindInModule(sMod,
+    uintptr_t localPlayerLea = mem.FindInModule(sClient,
         PAT_LOCALPLAYER, PAT_LOCALPLAYER_OFF);
     m_aLocalPlayer = mem.GetCallAddress(localPlayerLea);
 
-    uintptr_t glowFunCall = mem.FindInModule(sMod,
+    uintptr_t glowFunCall = mem.FindInModule(sClient,
         PAT_GLOWFUNCALL, PAT_GLOWFUNCALL_OFF);
     uintptr_t glowFun = mem.GetCallAddress(glowFunCall);
     m_aGlowPtr = mem.GetCallAddress(glowFun + 0xC);
 
-    uintptr_t playerResourcesMov = mem.FindInModule(sMod,
+    uintptr_t playerResourcesMov = mem.FindInModule(sClient,
         "48 8B 05 ?? ?? ?? ?? 55 48 89 E5 48 85 C0 74 10 48", 0x3);
     m_aPlayerResource = mem.GetCallAddress(playerResourcesMov);
-    /*
-    uintptr_t pr = 0;
-    if (mem.Read(aPlayerResources, pr)) {
-        uintptr_t kills = 0;
-        for (int i = 0; i < 10; ++i) {
-            mem.Read(pr + 0xf78 + i * 4, kills);
-            std::cout << kills << '\n';
-        }
-    }
-    */
 
-    uintptr_t foundAttackMov = mem.FindInModule(sMod,
+    uintptr_t foundAttackMov = mem.FindInModule(sClient,
         "F7 ?? 83 ?? ?? 45 ?? ?? 74", 0xE);
     m_aForceAttack = mem.GetCallAddress(foundAttackMov);
 
-    Update();
+    constexpr char sEngine[] = "engine_client.so";
+
+    uintptr_t connectedMov = m_mem.FindInModule(sEngine,
+        PAT_CONNECTEDMOV, PAT_CONNECTEDMOV_OFF);
+    m_aConnected = m_mem.GetCallAddress(connectedMov) + 1;
 }
 
-void IClient::Update()
+bool IClient::GetLocalPlayer(uintptr_t &out)
 {
-    uintptr_t localPlayer = 0;
-    if (m_mem.Read(m_aLocalPlayer, localPlayer)) {
-        m_pLocalPlayer = localPlayer;
+    if (!m_mem.Read(m_aLocalPlayer, out)) {
+        return false;
     }
+    return true;
 }
 
-CGlowObjectManager IClient::GetGlowObjectManager()
+bool IClient::GetGlowManager(CGlowObjectManager &out)
 {
-    CGlowObjectManager manager;
-    if (!m_mem.Read(m_aGlowPtr, manager)) {
-        throw 1;
+    if (!m_mem.Read(m_aGlowPtr, out)) {
+        return false;
     }
-    return manager;
+    return true;
 }
 
-CBaseEntity IClient::GetLocalPlayerEntity()
+bool IClient::IsConnected()
 {
-    CBaseEntity ent;
-    if (!m_mem.Read(m_pLocalPlayer, ent)) {
-        throw 1;
+    bool connected = false;
+    if (!m_mem.Read(m_aConnected, connected)) {
+        return false;
     }
-    return ent;
-}
-
-void IClient::SetForceAttack(bool enabled)
-{
-    int toggleOn = enabled ? 5 : 4;
-    m_mem.Write(m_aForceAttack, toggleOn);
-}
-
-uintptr_t IClient::GetLocalPlayer()
-{
-    return m_pLocalPlayer;
+    return connected;
 }

@@ -1,8 +1,8 @@
 add_executable(horker
     main.cpp
     memorymanager.cpp
-    interfaces/iengine.cpp
     interfaces/iclient.cpp
+    features/fglow.cpp
 )
 
 target_link_libraries(horker

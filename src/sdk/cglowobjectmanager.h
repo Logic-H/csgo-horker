@@ -27,12 +27,18 @@ struct GlowObjectDefinition_t
         return (long(&(this)->m_nNextFreeSlot) - long(this));
     }
 
-    void set(float r, float g, float b, float a)
+    void SetColor(float r, float g, float b, float a)
     {
         m_flGlowColor[0] = r;
         m_flGlowColor[1] = g;
         m_flGlowColor[2] = b;
         m_flGlowAlpha = a;
+    }
+
+    void SetRender(bool occluded, bool unoccluded)
+    {
+        m_bRenderWhenOccluded = occluded;
+        m_bRenderWhenUnoccluded = unoccluded;
     }
 
     CBaseEntity* m_pEntity;
@@ -56,6 +62,14 @@ struct GlowObjectDefinition_t
 class CGlowObjectManager
 {
 public:
+    size_t Count() {
+        return m_GlowObjectDefinitions.Count();
+    }
+
+    GlowObjectDefinition_t *Data() {
+        return m_GlowObjectDefinitions.Data();
+    }
+private:
     CUtlVector<GlowObjectDefinition_t> m_GlowObjectDefinitions;
     int m_nFirstFreeSlot;
 /*
