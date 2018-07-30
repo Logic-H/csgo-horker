@@ -4,10 +4,9 @@
 
 #include <cstdio>
 
-IClient::IClient(MemoryManager &mem) : IBase(mem)
+IClient::IClient(MemoryManager &mem, const std::string &sClient) : IBase(mem)
 {
-    constexpr char sClient[] = "client_panorama_client.so";
-
+    m_sClient = sClient;
     uintptr_t localPlayerLea = mem.FindInModule(sClient,
         PAT_LOCALPLAYER, PAT_LOCALPLAYER_OFF);
     m_aLocalPlayer = mem.GetCallAddress(localPlayerLea);
@@ -34,10 +33,10 @@ IClient::IClient(MemoryManager &mem) : IBase(mem)
 
 void IClient::PrintOffsets()
 {
-    uintptr_t sc = m_mem.GetModuleStart("client_panorama_client.so");
+    uintptr_t sc = m_mem.GetModuleStart(m_sClient);
     uintptr_t se = m_mem.GetModuleStart("engine_client.so");
     printf("\n========= Found Offsets =========\n");
-    printf("In client_panorama_client.so:\n");
+    printf("In %s:\n", m_sClient.data());
     printf("uintptr_t aLocalPlayer = %#lx\n", m_aLocalPlayer - sc);
     printf("uintptr_t aGlowPointer = %#lx\n", m_aGlowPtr - sc);
     printf("uintptr_t aPlayerResources = %#lx\n", m_aPlayerResource - sc);

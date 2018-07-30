@@ -15,9 +15,10 @@
 #include <signal.h>
 #include <unistd.h>
 
-bool shouldQuit = false;
 
 #define LOG(X) std::cout << X << std::flush
+
+bool shouldQuit = false;
 
 void exitHandle(int s)
 {
@@ -27,6 +28,9 @@ void exitHandle(int s)
 
 int main()
 {
+    constexpr char clientModuleDefault[] = "client_client.so";
+    constexpr char clientModulePanorama[] = "client_panorama_client.so";
+
     if (getuid() != 0) {
         LOG("This program must be ran as root.\n");
         return 0;
@@ -57,9 +61,17 @@ int main()
     LOG("Done.\n");
     LOG("Waiting for client library...");
 
+    std::string clientModule;
+
     while (!shouldQuit) {
         mem.ParseModules();
-        if (mem.GetModuleStart("client_panorama_client.so") != 0) {
+        if (mem.GetModuleStart(clientModulePanorama) != 0) {
+            clientModule = clientModulePanorama;
+            break;
+        }
+
+        if (mem.GetModuleStart(clientModuleDefault) != 0) {
+            clientModule = clientModuleDefault;
             break;
         }
         std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -72,7 +84,7 @@ int main()
     LOG("Done.\n");
     LOG("Finding offset addresses...");
     
-    IClient client(mem);
+    IClient client(mem, clientModule);
     
     LOG("Done.\n");
     client.PrintOffsets();

@@ -5,12 +5,13 @@
 
 class IClient : public IBase {
     public:
-        IClient(MemoryManager &mem);
+        IClient(MemoryManager &mem, const std::string &sClient);
         void PrintOffsets();
         bool IsConnected();
         bool GetGlowManager(CGlowObjectManager &out);
         bool GetLocalPlayer(uintptr_t &out);
     private:
+        std::string m_sClient;
         // Stored addresses
         uintptr_t m_aGlowPtr = 0;
         uintptr_t m_aLocalPlayer = 0;
