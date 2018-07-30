@@ -2,6 +2,8 @@
 #include "../patterns.h"
 #include "../sdk/cglowobjectmanager.h"
 
+#include <cstdio>
+
 IClient::IClient(MemoryManager &mem) : IBase(mem)
 {
     constexpr char sClient[] = "client_panorama_client.so";
@@ -28,6 +30,22 @@ IClient::IClient(MemoryManager &mem) : IBase(mem)
     uintptr_t connectedMov = m_mem.FindInModule(sEngine,
         PAT_CONNECTEDMOV, PAT_CONNECTEDMOV_OFF);
     m_aConnected = m_mem.GetCallAddress(connectedMov) + 1;
+}
+
+void IClient::PrintOffsets()
+{
+    uintptr_t sc = m_mem.GetModuleStart("client_panorama_client.so");
+    uintptr_t se = m_mem.GetModuleStart("engine_client.so");
+    printf("\n========= Found Offsets =========\n");
+    printf("In client_panorama_client.so:\n");
+    printf("uintptr_t aLocalPlayer = %#lx\n", m_aLocalPlayer - sc);
+    printf("uintptr_t aGlowPointer = %#lx\n", m_aGlowPtr - sc);
+    printf("uintptr_t aPlayerResources = %#lx\n", m_aPlayerResource - sc);
+    printf("uintptr_t aForceAttack = %#lx\n", m_aForceAttack - sc);
+
+    printf("\nIn engine_client.so\n");
+    printf("uintptr_t aConnected = %#lx\n", m_aConnected - se);
+    printf("=================================\n\n");
 }
 
 bool IClient::GetLocalPlayer(uintptr_t &out)

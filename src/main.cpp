@@ -1,10 +1,10 @@
-#include "memorymanager.h"
-#include "offsets.h"
 #include "features/fglow.h"
 #include "interfaces/iclient.h"
 #include "sdk/cbaseentity.h"
 #include "sdk/cglowobjectmanager.h"
 #include "sdk/types.h"
+#include "memorymanager.h"
+#include "offsets.h"
 
 #include <chrono>
 #include <cstring>
@@ -75,6 +75,7 @@ int main()
     IClient client(mem);
     
     LOG("Done.\n");
+    client.PrintOffsets();
     LOG("> Main Start <\n");
 
     FGlow tGlow;

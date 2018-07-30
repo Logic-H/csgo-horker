@@ -6,6 +6,7 @@
 class IClient : public IBase {
     public:
         IClient(MemoryManager &mem);
+        void PrintOffsets();
         bool IsConnected();
         bool GetGlowManager(CGlowObjectManager &out);
         bool GetLocalPlayer(uintptr_t &out);
