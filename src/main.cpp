@@ -87,10 +87,12 @@ int main()
     IClient client(mem, clientModule);
     
     LOG("Done.\n");
+
     client.PrintOffsets();
+
     LOG("> Main Start <\n");
 
-    FGlow tGlow;
+    FGlow fglow(mem, client);
     bool tRunning = false;
 
     while (!shouldQuit) {
@@ -101,13 +103,14 @@ int main()
         }
         if (client.IsConnected() && !tRunning) {
             tRunning = true;
-            std::thread th1([&]() { tGlow.Run(mem, client); });
+            fglow.Start();
+
             while (client.IsConnected() && tRunning && !shouldQuit) {
                 std::this_thread::sleep_for(std::chrono::seconds(1));
             }
+
+            fglow.Stop();
             tRunning = false;
-            tGlow.Stop();
-            th1.join();
         }
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }

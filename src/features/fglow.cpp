@@ -7,17 +7,43 @@
 #include <iostream>
 #include <thread>
 
+FGlow::FGlow(MemoryManager &mem, IClient &client) : 
+    m_mem(mem), m_client(client)
+{
+
+}
+
+FGlow::~FGlow()
+{
+    Stop();
+}
+
+void FGlow::Start()
+{
+    Stop();
+    m_stop = false;
+    m_thread = std::thread(&FGlow::Run, this);
+}
+
+void FGlow::Stop()
+{
+    m_stop = true;
+    if (m_thread.joinable()) {
+        m_thread.join();
+    }
+}
+
 void FGlow::WaitWarn(const std::string &warning)
 {
-    std::cout << warning << std::endl;
+    std::cout << "WARN: " << warning << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
-void FGlow::Run(MemoryManager &mem, IClient &client)
+void FGlow::Run()
 {
     std::cout << "Started glow thread" << std::endl;
 
-    while (!StopRequested()) {
+    while (!m_stop) {
         constexpr size_t szGlowDef = sizeof(GlowObjectDefinition_t);
 
         struct iovec g_remote[1024];
@@ -29,7 +55,7 @@ void FGlow::Run(MemoryManager &mem, IClient &client)
         memset(g_glow, 0, sizeof(g_glow));
 
         CGlowObjectManager manager;
-        if (!client.GetGlowManager(manager)) {
+        if (!m_client.GetGlowManager(manager)) {
             WaitWarn("Failed to get GlowObjectManager");
             continue;
         }
@@ -37,20 +63,20 @@ void FGlow::Run(MemoryManager &mem, IClient &client)
         size_t count = manager.Count();
         void *data_ptr = manager.Data();
 
-        if (!mem.Read(data_ptr, g_glow, szGlowDef * count)) {
+        if (!m_mem.Read(data_ptr, g_glow, szGlowDef * count)) {
             WaitWarn("Failed to read m_GlowObjectDefinitions");
             continue;
         }
 
         uintptr_t localPlayer = 0;
-        if (!client.GetLocalPlayer(localPlayer)) {
+        if (!m_client.GetLocalPlayer(localPlayer)) {
             WaitWarn("Failed to get local player address");
             continue;
         }
 
         int myTeam = 0;
-        if (!mem.Read(localPlayer + OFF_TEAM, myTeam)) {
-            WaitWarn("Failed to get local team number");
+        if (!m_mem.Read(localPlayer + OFF_TEAM, myTeam)) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
             continue;
         }
 
@@ -58,7 +84,7 @@ void FGlow::Run(MemoryManager &mem, IClient &client)
         for (size_t i = 0; i < count; ++i) {
             if (g_glow[i].m_pEntity != NULL) {
                 CBaseEntity ent;
-                if (mem.Read(g_glow[i].m_pEntity, ent)) {
+                if (m_mem.Read(g_glow[i].m_pEntity, ent)) {
                     if (ent.GetTeam() < TEAM_T) {
                         g_glow[i].SetRender(true, false);
                         continue;
@@ -94,7 +120,7 @@ void FGlow::Run(MemoryManager &mem, IClient &client)
 
             writeCount++;
         }
-        mem.WriteMulti(g_local, g_remote, writeCount);
+        m_mem.WriteMulti(g_local, g_remote, writeCount);
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
     std::cout << "Stopping glow thread" << std::endl;
