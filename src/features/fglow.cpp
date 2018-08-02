@@ -4,8 +4,6 @@
 #include "../offsets.h"
 
 #include <cstring>
-#include <iostream>
-#include <thread>
 
 FGlow::FGlow(MemoryManager &mem, IClient &client) : 
     m_mem(mem), m_client(client)
@@ -13,35 +11,9 @@ FGlow::FGlow(MemoryManager &mem, IClient &client) :
 
 }
 
-FGlow::~FGlow()
-{
-    Stop();
-}
-
-void FGlow::Start()
-{
-    Stop();
-    m_stop = false;
-    m_thread = std::thread(&FGlow::Run, this);
-}
-
-void FGlow::Stop()
-{
-    m_stop = true;
-    if (m_thread.joinable()) {
-        m_thread.join();
-    }
-}
-
-void FGlow::WaitWarn(const std::string &warning)
-{
-    std::cout << "WARN: " << warning << std::endl;
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-}
-
 void FGlow::Run()
 {
-    std::cout << "Started glow thread" << std::endl;
+    Log("Started Glow");
 
     while (!m_stop) {
         constexpr size_t szGlowDef = sizeof(GlowObjectDefinition_t);
@@ -56,7 +28,7 @@ void FGlow::Run()
 
         CGlowObjectManager manager;
         if (!m_client.GetGlowManager(manager)) {
-            WaitWarn("Failed to get GlowObjectManager");
+            LogWait("Failed to get GlowObjectManager");
             continue;
         }
 
@@ -64,19 +36,19 @@ void FGlow::Run()
         void *data_ptr = manager.Data();
 
         if (!m_mem.Read(data_ptr, g_glow, szGlowDef * count)) {
-            WaitWarn("Failed to read m_GlowObjectDefinitions");
+            LogWait("Failed to read m_GlowObjectDefinitions");
             continue;
         }
 
         uintptr_t localPlayer = 0;
         if (!m_client.GetLocalPlayer(localPlayer)) {
-            WaitWarn("Failed to get local player address");
+            LogWait("Failed to get local player address");
             continue;
         }
 
         int myTeam = 0;
         if (!m_mem.Read(localPlayer + OFF_TEAM, myTeam)) {
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+            Wait();
             continue;
         }
 
@@ -123,5 +95,5 @@ void FGlow::Run()
         m_mem.WriteMulti(g_local, g_remote, writeCount);
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
-    std::cout << "Stopping glow thread" << std::endl;
+    Log("Stopped Glow");
 }

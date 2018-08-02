@@ -1,21 +1,14 @@
 #pragma once
 
+#include "fbase.h"
 #include "../interfaces/iclient.h"
 #include "../memorymanager.h"
 
-#include <thread>
-class FGlow {
+class FGlow final : public FBase {
+    MemoryManager &m_mem;
+    IClient &m_client;
     public:
         FGlow(MemoryManager &mem, IClient &client);
-        ~FGlow();
-        void Start();
-        void Stop();
-    private:
+    protected:
         void Run();
-        void WaitWarn(const std::string &warning);
-
-        std::thread m_thread;
-        bool m_stop = false;
-        MemoryManager &m_mem;
-        IClient &m_client;
 };

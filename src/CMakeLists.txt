@@ -2,6 +2,7 @@ add_executable(horker
     main.cpp
     memorymanager.cpp
     interfaces/iclient.cpp
+    features/fbase.cpp
     features/fglow.cpp
 )
 
