@@ -11,11 +11,15 @@ class FBase {
         void operator=(FBase const &) = delete;
         void Start();
         void Stop();
+
     protected:
         virtual void Run() = 0;
         void Log(const std::string &msg);
         void LogWait(const std::string &msg, size_t timeout = 1);
         void Wait(size_t timeout = 1);
+        bool ShouldStop();
+
+    private:
         std::thread m_thread;
         std::atomic<bool> m_stop;
 };

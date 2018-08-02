@@ -15,7 +15,7 @@ void FGlow::Run()
 {
     Log("Started Glow");
 
-    while (!m_stop) {
+    while (!ShouldStop()) {
         constexpr size_t szGlowDef = sizeof(GlowObjectDefinition_t);
 
         struct iovec g_remote[1024];

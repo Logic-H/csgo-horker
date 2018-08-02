@@ -28,6 +28,11 @@ void FBase::Stop()
     }
 }
 
+bool FBase::ShouldStop()
+{
+    return m_stop;
+}
+
 void FBase::Log(const std::string &msg)
 {
     std::cout << msg << std::endl;
