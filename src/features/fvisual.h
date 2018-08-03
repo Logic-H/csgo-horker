@@ -2,20 +2,13 @@
 
 #include "../interfaces/iclient.h"
 #include "../memorymanager.h"
+#include "fbase.h"
 
-#include <thread>
-class FVisual {
-public:
-    FVisual(MemoryManager &mem, IClient &client);
-    ~FVisual();
-    void Start();
-    void Stop();
-private:
-    void Run();
-    void WaitWarn(const std::string &warning);
-
-    std::thread m_thread;
-    bool m_stop = false;
+class FVisual final : public FBase {
     MemoryManager &m_mem;
     IClient &m_client;
+    public:
+        FVisual(MemoryManager &mem, IClient &client);
+    protected:
+        void Run();
 };
