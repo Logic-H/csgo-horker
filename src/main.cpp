@@ -1,4 +1,5 @@
 #include "features/fglow.h"
+#include "features/fvisual.h"
 #include "interfaces/iclient.h"
 #include "sdk/cbaseentity.h"
 #include "sdk/cglowobjectmanager.h"
@@ -93,6 +94,7 @@ int main()
     LOG("> Main Start <\n");
 
     FGlow fglow(mem, client);
+    FVisual fvisual(mem, client);
     bool tRunning = false;
 
     while (!shouldQuit) {
@@ -104,12 +106,14 @@ int main()
         if (client.IsConnected() && !tRunning) {
             tRunning = true;
             fglow.Start();
+            fvisual.Start();
 
             while (client.IsConnected() && tRunning && !shouldQuit) {
                 std::this_thread::sleep_for(std::chrono::seconds(1));
             }
 
             fglow.Stop();
+            fvisual.Stop();
             tRunning = false;
         }
         std::this_thread::sleep_for(std::chrono::seconds(1));
