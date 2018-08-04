@@ -3,7 +3,7 @@
 #include "../sdk/cglowobjectmanager.h"
 #include "../offsets.h"
 
-#include <cstring>
+typedef struct GlowObjectDefinition_t glow_t;
 
 FGlow::FGlow(MemoryManager &mem, IClient &client) : 
     m_mem(mem), m_client(client)
@@ -16,15 +16,9 @@ void FGlow::Run()
     Log("Started Glow");
 
     while (!ShouldStop()) {
-        constexpr size_t szGlowDef = sizeof(GlowObjectDefinition_t);
-
-        struct iovec g_remote[1024];
-        struct iovec g_local[1024];
-        struct GlowObjectDefinition_t g_glow[1024];
-
-        memset(g_remote, 0, sizeof(g_remote));
-        memset(g_local, 0, sizeof(g_local));
-        memset(g_glow, 0, sizeof(g_glow));
+        std::array<struct iovec, 512> g_remote;
+        std::array<struct iovec, 512> g_local;
+        std::array<glow_t, 512> g_glow;
 
         CGlowObjectManager manager;
         if (!m_client.GetGlowManager(manager)) {
@@ -32,10 +26,10 @@ void FGlow::Run()
             continue;
         }
 
-        size_t count = manager.Count();
+        const size_t count = manager.Count();
         void *data_ptr = manager.Data();
 
-        if (!m_mem.Read(data_ptr, g_glow, szGlowDef * count)) {
+        if (!m_mem.Read(data_ptr, g_glow, sizeof(glow_t) * count)) {
             LogWait("Failed to read m_GlowObjectDefinitions");
             continue;
         }
@@ -53,7 +47,7 @@ void FGlow::Run()
         }
 
         size_t writeCount = 0;
-        for (size_t i = 0; i < count; ++i) {
+        for (size_t i = 1; i < count; ++i) {
             if (g_glow[i].m_pEntity != NULL) {
                 CBaseEntity ent;
                 if (m_mem.Read(g_glow[i].m_pEntity, ent)) {
@@ -82,17 +76,14 @@ void FGlow::Run()
                 }
             }
 
-            size_t bytesToCutOffEnd = szGlowDef - g_glow[i].writeEnd();
-            size_t bytesToCutOffBegin = (size_t)g_glow[i].writeStart();
-            size_t totalWriteSize = (szGlowDef - (bytesToCutOffBegin + bytesToCutOffEnd));
             g_remote[writeCount].iov_base =
-                ((uint8_t*)data_ptr + (szGlowDef * i)) + bytesToCutOffBegin;
-            g_local[writeCount].iov_base = ((uint8_t*)&g_glow[i]) + bytesToCutOffBegin;
-            g_remote[writeCount].iov_len = g_local[writeCount].iov_len = totalWriteSize;
+                ((uint8_t*)data_ptr + (sizeof(glow_t) * i)) + glow_t::WriteStart();
+            g_local[writeCount].iov_base = ((uint8_t*)&g_glow[i]) + glow_t::WriteStart();
+            g_remote[writeCount].iov_len = g_local[writeCount].iov_len = glow_t::WriteSize();
 
             writeCount++;
         }
-        m_mem.WriteMulti(g_local, g_remote, writeCount);
+        m_mem.WriteMulti(g_local.data(), g_remote.data(), writeCount);
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
     Log("Stopped Glow");

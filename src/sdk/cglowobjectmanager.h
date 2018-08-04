@@ -3,8 +3,11 @@
 #include "cbaseentity.h"
 #include "cutlvector.h"
 
+#include <cstddef>
+
 #define END_OF_FREE_LIST -1
 #define ENTRY_IN_USE -2
+
 struct GlowObjectDefinition_t
 {
     bool ShouldDraw( int nSlot ) const
@@ -17,14 +20,15 @@ struct GlowObjectDefinition_t
         return m_nNextFreeSlot != ENTRY_IN_USE;
     }
 
-    long writeStart()
+    static inline size_t WriteStart()
     {
-        return (long(&(this)->m_flGlowColor) - long(this));
+        return offsetof(struct GlowObjectDefinition_t, m_flGlowColor);
     }
 
-    long writeEnd()
+    static inline size_t WriteSize()
     {
-        return (long(&(this)->m_nNextFreeSlot) - long(this));
+        return offsetof(struct GlowObjectDefinition_t, m_nSplitScreenSlot) -
+               offsetof(struct GlowObjectDefinition_t, m_flGlowColor);
     }
 
     void SetColor(float r, float g, float b, float a)
