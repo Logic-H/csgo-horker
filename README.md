@@ -4,8 +4,6 @@ A simple CSGO Linux external hack.
 ### Preamble
 I created this as a stop-gap while we work on updating jwaim.  Currently the only supported feature is glow, but I plan on adding a few more nice things once I get the code base in better shape.
 
-I'll keep a feature list here and update it as things change.  There isn't any config to speak of yet, but I do plan on adding one once more features are completed.
-
 ### Current Features
 * Glow
 * Noflash
@@ -30,6 +28,8 @@ In order to run this, you MUST use sudo/su due to the memory functions.  Once yo
 ```bash
 sudo ./src/horker
 ```
+
+On first run, a config.ini file will be placed in your build directory.  If you want easier access to the file use chown to get ownership of the file.  The list of options available will grow with the project.
 
 ### Screenshots
 ![Screenshot 1](https://github.com/Teklad/resources/blob/master/csgo-horker/glow1.jpg?raw=true "One")
