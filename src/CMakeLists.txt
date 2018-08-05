@@ -1,5 +1,6 @@
 add_executable(horker
     main.cpp
+    config.cpp
     process.cpp
     helper.cpp
     engine.cpp

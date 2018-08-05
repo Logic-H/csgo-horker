@@ -1,5 +1,6 @@
 #include "faim.h"
 
+#include "../config.h"
 #include "../engine.h"
 #include "../offsets.h"
 
@@ -8,12 +9,18 @@
 
 void FAim::Run()
 {
+    const int triggerKey = Engine::StringToKeycode(Config::AimBot::TriggerKey);
+    
     Log("[FAim] Started");
-    int triggerKey = Engine::StringToKeycode("F");
+    
     auto& eng = Engine::GetInstance();
     
     while (!ShouldStop()) {
-        if (eng.IsKeyDown(triggerKey)) {
+        if (!eng.IsKeyDown(triggerKey) && Config::AimBot::UseTriggerKey) {
+            WaitMs(20);
+            continue;
+        }
+        if (Config::AimBot::Trigger) {
             try {
                 int myTeam = eng.GetLocalPlayerTeam();
                 int inCrossID = eng.GetLocalPlayerVariable<int>(OFF_INCROSSHAIRID);
@@ -33,10 +40,8 @@ void FAim::Run()
             } catch(std::runtime_error &e) {
                 LogWait(e.what());
             }
-            WaitMs(1);
-        } else {
-            WaitMs(20);
         }
+        WaitMs(1);
     }
     Log("[FAim] Stopped");
 }

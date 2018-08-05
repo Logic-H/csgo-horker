@@ -5,6 +5,7 @@
 #include "sdk/cglowobjectmanager.h"
 #include "sdk/types.h"
 
+#include "config.h"
 #include "engine.h"
 #include "globals.h"
 #include "helper.h"
@@ -70,6 +71,8 @@ int main()
     if (shouldQuit) {
         return 0;
     }
+
+    ReadConfig("config.ini");
 
     LOG("Done.\n");
     FindOffsets(proc);

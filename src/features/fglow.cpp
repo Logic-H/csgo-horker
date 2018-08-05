@@ -1,25 +1,42 @@
 #include "fglow.h"
 
 #include "../sdk/cglowobjectmanager.h"
+#include "../config.h"
 #include "../engine.h"
 #include "../offsets.h"
 
 typedef struct GlowObjectDefinition_t glow_t;
 
-static inline void GlowPlayer(GlowObjectDefinition_t &glowObject, int localTeam, int otherTeam)
-{
-    if (localTeam == otherTeam) {
-        glowObject.SetRender(true, false);
-        glowObject.SetColor(0.f, .8f, .8f, .8f);
-    } else {
-        glowObject.SetRender(true, false);
-        glowObject.SetColor(.8f, .8f, 0.f, .8f);
-    }
-}
-
 void FGlow::Run()
 {
     auto& eng = Engine::GetInstance();
+
+    const float clrE[4] = {
+        Config::Glow::EnemyR,
+        Config::Glow::EnemyG,
+        Config::Glow::EnemyB,
+        Config::Glow::EnemyA
+    };
+
+    const float clrA[4] = {
+        Config::Glow::AllyR,
+        Config::Glow::AllyG,
+        Config::Glow::AllyB,
+        Config::Glow::AllyA
+    };
+
+    const float clrO[4] { .9f, .5f, .9f, .4f };
+
+    const bool bGlowAllies = Config::Glow::GlowAllies;
+    const bool bGlowEnemies = Config::Glow::GlowEnemies;
+    const bool bGlowOther = Config::Glow::GlowOther;
+    const bool bGlowWeapons = Config::Glow::GlowWeapons;
+    const bool bLegitGlow = Config::Glow::LegitGlow;
+
+    if (!Config::Glow::Enabled) {
+        return;
+    }
+
     Log("[FGlow] Started");
 
     while (!ShouldStop()) {
@@ -47,11 +64,32 @@ void FGlow::Run()
                     if (m_mem.Read(g_glow[i].m_pEntity, ent)) {
                         if (g_glow[i].m_bRenderWhenOccluded) {
                             continue;
-                        } else if (ent.m_iHealth < 1 /* && !config::GlowWeapons */) {
-                            continue;
                         }
-                        if (ent.m_iTeamNum == TEAM_T || ent.m_iTeamNum == TEAM_CT) {
-                            GlowPlayer(g_glow[i], myTeam, ent.GetTeam());
+                        if (bLegitGlow) {
+                            g_glow[i].m_nGlowStyle = 2;
+                        }
+                        if (ent.m_iTeamNum == TEAM_SPEC || ent.m_iTeamNum == TEAM_NONE) {
+                            if (!bGlowOther) {
+                                continue;
+                            }
+                            g_glow[i].SetRender(true, false);
+                            g_glow[i].SetColor(clrO);
+                        } else if (ent.m_iTeamNum == TEAM_T || ent.m_iTeamNum == TEAM_CT) {
+                            if (bGlowAllies && ent.m_iTeamNum == myTeam) {
+                                if (ent.m_iHealth < 1 && !bGlowWeapons) {
+                                    continue;
+                                }
+                                g_glow[i].SetRender(true, false);
+                                g_glow[i].SetColor(clrA);
+                            } else if (bGlowEnemies && ent.m_iTeamNum != myTeam) {
+                                if (ent.m_iHealth < 1 && !bGlowWeapons) {
+                                    continue;
+                                }
+                                g_glow[i].SetRender(true, false);
+                                g_glow[i].SetColor(clrE);
+                            } else {
+                                continue;
+                            }
                         }
                     }
                 }

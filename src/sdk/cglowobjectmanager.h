@@ -4,6 +4,7 @@
 #include "cutlvector.h"
 
 #include <cstddef>
+#include <cstring>
 
 #define END_OF_FREE_LIST -1
 #define ENTRY_IN_USE -2
@@ -37,6 +38,11 @@ struct GlowObjectDefinition_t
         m_flGlowColor[1] = g;
         m_flGlowColor[2] = b;
         m_flGlowAlpha = a;
+    }
+
+    void SetColor(const float rgba[4])
+    {
+        memcpy(m_flGlowColor, rgba, sizeof(float) * 4);
     }
 
     void SetRender(bool occluded, bool unoccluded)
