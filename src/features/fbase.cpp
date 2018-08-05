@@ -28,11 +28,6 @@ void FBase::Stop()
     }
 }
 
-bool FBase::ShouldStop()
-{
-    return m_stop;
-}
-
 void FBase::Log(const std::string &msg)
 {
     std::cout << msg << std::endl;
@@ -44,7 +39,3 @@ void FBase::LogWait(const std::string &msg, size_t timeout)
     Wait(timeout);
 }
 
-void FBase::Wait(size_t timeout)
-{
-    std::this_thread::sleep_for(std::chrono::seconds(timeout));
-}

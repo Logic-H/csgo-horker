@@ -1,4 +1,4 @@
-#include "memorymanager.h"
+#include "process.h"
 
 #include <algorithm>
 #include <chrono>
@@ -29,7 +29,7 @@ static std::string SafeReadLink(const std::string &strPath)
     return path;
 }
 
-void MemoryManager::InitHexLookup()
+void Process::InitHexLookup()
 {
    m_lookup['0'] = 0;
    m_lookup['1'] = 1;
@@ -58,7 +58,7 @@ void MemoryManager::InitHexLookup()
    m_lookup['?'] = 0;
 }
 
-std::vector<uint8_t> MemoryManager::HexToBin(const std::string &str)
+std::vector<uint8_t> Process::HexToBin(const std::string &str)
 {
     std::vector<uint8_t> bin;
     size_t len = str.size();
@@ -72,13 +72,7 @@ std::vector<uint8_t> MemoryManager::HexToBin(const std::string &str)
     return bin;
 }
 
-MemoryManager::MemoryManager(const std::string &processName)
-{
-    m_processName = processName;
-    InitHexLookup();
-}
-
-bool MemoryManager::IsValid()
+bool Process::IsValid()
 {
     std::string procPath("/proc/" + std::to_string(m_pid));
     struct stat st;
@@ -88,11 +82,14 @@ bool MemoryManager::IsValid()
     return false;
 }
 
-bool MemoryManager::Attach(std::string processName)
+Process::Process(const std::string &processName)
 {
-    if (processName.empty()) {
-        processName = m_processName;
-    }
+    m_processName = processName;
+    InitHexLookup();
+}
+
+bool Process::Attach()
+{
 
     DIR *pdir = opendir("/proc");
     if (pdir) {
@@ -104,7 +101,7 @@ bool MemoryManager::Attach(std::string processName)
                 std::string rlbuf = SafeReadLink(path);
                 size_t separator = rlbuf.find_last_of('/');
                 if (separator != std::string::npos) {
-                    if (rlbuf.compare(separator + 1, std::string::npos, processName) == 0) {
+                    if (rlbuf.compare(separator + 1, std::string::npos, m_processName) == 0) {
                         m_pid = id;
                         break;
                     }
@@ -116,8 +113,9 @@ bool MemoryManager::Attach(std::string processName)
     return m_pid != -1;
 }
 
-bool MemoryManager::ParseModules()
+bool Process::ParseModules()
 {
+    m_modules.clear();
     char g1;
     std::string g2;
     uintptr_t start, end;
@@ -154,7 +152,12 @@ bool MemoryManager::ParseModules()
     return !m_modules.empty();
 }
 
-uintptr_t MemoryManager::GetModuleStart(const std::string &moduleName)
+bool Process::HasModule(const std::string &moduleName)
+{
+    return (m_modules.find(moduleName) != m_modules.end());
+}
+
+uintptr_t Process::GetModuleStart(const std::string &moduleName)
 {
     if (m_modules.find(moduleName) != m_modules.end()) {
         return m_modules[moduleName].start;
@@ -162,7 +165,7 @@ uintptr_t MemoryManager::GetModuleStart(const std::string &moduleName)
     return 0;
 }
 
-uintptr_t MemoryManager::FindInModule(const std::string &moduleName, const std::string &pattern, size_t offset)
+uintptr_t Process::FindInModule(const std::string &moduleName, const std::string &pattern, size_t offset)
 {
     if (m_modules.find(moduleName) == m_modules.end()) {
         return 0;
@@ -198,12 +201,18 @@ uintptr_t MemoryManager::FindInModule(const std::string &moduleName, const std::
     return 0;
 }
 
-uintptr_t MemoryManager::GetCallAddress(uintptr_t address)
+uintptr_t Process::GetCallAddress(uintptr_t address)
 {
-    uintptr_t code = 0;
-    if (this->Read(address, code, 4)) {
-        return (address + code + 4);
-    }
-    return 0;
+    return this->GetAbsoluteAddress(address, 1, 5);
 }
 
+
+uintptr_t Process::GetAbsoluteAddress(uintptr_t address, size_t offset, size_t size)
+{
+    uintptr_t code = 0;
+    if (this->Read(address + offset, code, sizeof(unsigned int))) {
+        return address + code + size;
+    }
+
+    return 0;
+}

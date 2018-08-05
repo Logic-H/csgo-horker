@@ -73,15 +73,11 @@ public:
     GlowObjectDefinition_t *Data() {
         return m_GlowObjectDefinitions.Data();
     }
+    unsigned int UNK() {
+        return m_GlowObjectDefinitions.Count();
+    }
 private:
     CUtlVector<GlowObjectDefinition_t> m_GlowObjectDefinitions;
     int m_nFirstFreeSlot;
-/*
-    unsigned int unk1;
-    unsigned int unk2;
-    unsigned int unk3;
-    unsigned int unk4;
-    unsigned int unk5;
-*/
 };
 

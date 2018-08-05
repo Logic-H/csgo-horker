@@ -1,11 +1,15 @@
+#include "features/faim.h"
 #include "features/fglow.h"
 #include "features/fvisual.h"
-#include "interfaces/iclient.h"
 #include "sdk/cbaseentity.h"
 #include "sdk/cglowobjectmanager.h"
 #include "sdk/types.h"
-#include "memorymanager.h"
+
+#include "engine.h"
+#include "globals.h"
+#include "helper.h"
 #include "offsets.h"
+#include "process.h"
 
 #include <chrono>
 #include <cstring>
@@ -15,7 +19,6 @@
 
 #include <signal.h>
 #include <unistd.h>
-
 
 #define LOG(X) std::cout << X << std::flush
 
@@ -27,52 +30,38 @@ void exitHandle(int s)
     shouldQuit = true;
 }
 
+void connectSignals(struct sigaction &handle)
+{
+    handle.sa_handler = exitHandle;
+    sigemptyset(&handle.sa_mask);
+    handle.sa_flags = 0;
+    sigaction(SIGINT, &handle, NULL);
+    sigaction(SIGQUIT, &handle, NULL);
+}
+
 int main()
 {
-    constexpr char clientModuleDefault[] = "client_client.so";
-    constexpr char clientModulePanorama[] = "client_panorama_client.so";
-
     if (getuid() != 0) {
         LOG("This program must be ran as root.\n");
         return 0;
     }
     
-    LOG("Attaching interrupt signal handler...");
-    
     struct sigaction ccHandle;
-    ccHandle.sa_handler = exitHandle;
-    sigemptyset(&ccHandle.sa_mask);
-    ccHandle.sa_flags = 0;
-    sigaction(SIGINT, &ccHandle, NULL);
+    connectSignals(ccHandle);
     
-    LOG("Done.\n");
-
-    MemoryManager mem("csgo_linux64");
+    Process proc(PROCESS_NAME);
     
     LOG("Waiting for process...");
     
-    while (!mem.Attach() && !shouldQuit) {
+    while (!proc.Attach() && !shouldQuit) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
-    if (shouldQuit) {
-        return 0;
-    }
-
-    LOG("Done.\n");
-    LOG("Waiting for client library...");
-
-    std::string clientModule;
+    LOG("Done.\nWaiting for client and engine library...");
 
     while (!shouldQuit) {
-        mem.ParseModules();
-        if (mem.GetModuleStart(clientModulePanorama) != 0) {
-            clientModule = clientModulePanorama;
-            break;
-        }
-
-        if (mem.GetModuleStart(clientModuleDefault) != 0) {
-            clientModule = clientModuleDefault;
+        proc.ParseModules();
+        if (proc.HasModule(CLIENT_SO) && proc.HasModule(ENGINE_SO)) {
             break;
         }
         std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -83,39 +72,48 @@ int main()
     }
 
     LOG("Done.\n");
-    LOG("Finding offset addresses...");
-    
-    IClient client(mem, clientModule);
-    
-    LOG("Done.\n");
+    FindOffsets(proc);
+    PrintOffsets(proc);
 
-    client.PrintOffsets();
+    auto& eng = Engine::GetInstance();
+    eng.SetProcessManager(&proc);
+    eng.Update(true);
+    // Feature handlers
+    FAim faim(proc);
+    FGlow fglow(proc);
+    FVisual fvisual(proc);
 
-    LOG("> Main Start <\n");
-
-    FGlow fglow(mem, client);
-    FVisual fvisual(mem, client);
-    bool tRunning = false;
+    const uintptr_t aIsConnected = Offset::Engine::IsConnected;
+    bool isConnected = false;
 
     while (!shouldQuit) {
-        if (!mem.IsValid()) {
+        if (!proc.IsValid() || !proc.Read(aIsConnected, isConnected)) {
             shouldQuit = true;
-            LOG("Lost connection to process... Exiting\n");
+            LOG("Lost connection to process... Exiting.\n");
             break;
         }
-        if (client.IsConnected() && !tRunning) {
-            tRunning = true;
+
+        // ### BEGIN MENU HACKS ###
+        
+        // ### END MENU HACKS ###
+        
+        // ### BEGIN IN-GAME HACKS ###
+        if (isConnected) {
+            faim.Start();
             fglow.Start();
             fvisual.Start();
 
-            while (client.IsConnected() && tRunning && !shouldQuit) {
-                std::this_thread::sleep_for(std::chrono::seconds(1));
+            while (isConnected && !shouldQuit) {
+                proc.Read(aIsConnected, isConnected);
+                eng.Update();
+                std::this_thread::sleep_for(std::chrono::milliseconds(50));
             }
 
+            faim.Stop();
             fglow.Stop();
             fvisual.Stop();
-            tRunning = false;
         }
+        // ### END IN-GAME HACKS ###
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     return 0;

@@ -4,4 +4,5 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
 find_package (Threads REQUIRED)
+find_package (X11 REQUIRED)
 add_subdirectory(src)

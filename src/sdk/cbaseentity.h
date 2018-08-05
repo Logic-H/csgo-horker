@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.h"
+#include "basetypes.h"
 
 #define MAX_PATH 260
 
@@ -15,28 +16,21 @@
 
 class CBaseEntity {
     public:
-        int GetHealth() {
-            return m_iHealth;
-        }
-        
-        int GetLifeState() {
-            return m_lifeState;
-        }
+        int GetHealth() const;
+        int GetLifeState() const;
+        int GetTeam();
+        int GetIndex(); 
 
-        int GetTeam() {
-            return m_iTeamNum;
-        }
-        
-        int GetIndex() {
-            return index;
-        }
-
-    private:
-        char __buf_0x00[0x94]; // 0x0
+//    private:
+        char __buf_0x00[0x40]; // 0x0
+        float m_flLastMadeNoiseTime;  //0x40
+        char __buf_0x44[0x4C]; //0x44
+        bool m_bIsAutoaimTarget; //0x90
+        char __buf_0x91[0x3]; //0x91
         int index; // 0x94
         unsigned short m_EntClientFlags; // 0x98
         const void *model; // 0xA0
-        char m_clrRender[0x4]; // 0xA8
+        color32 m_clrRender; // 0xA8
         int m_cellbits; // 0xAC
         int m_cellwidth; // 0xB0
         int m_cellX; // 0xB4
@@ -52,30 +46,45 @@ class CBaseEntity {
         float m_flGravity; // 0x114
         float m_flProxyRandomValue; // 0x118
         int m_iEFlags; // 0x11C
-        bool m_nWaterType; // 0x120
+        unsigned char m_nWaterType; // 0x120
         bool m_bDormant; // 0x121
         char __buf_0x122[0x2]; // 0x122
-        float m_fEffects; // 0x124
+        int m_fEffects; // 0x124
         int m_iTeamNum; // 0x128
-        int m_iNextThinkTick; // 0x12C
-        char __buf_0x130[0x4]; // 0x130
+        int m_iPendingTeamNum; // 0x12C
+        int m_nNextThinkTick; // 0x130
         int m_iHealth; // 0x134
         int m_fFlags; // 0x138
         Vector m_vecViewOffset; // 0x13C
         Vector m_vecVelocity; // 0x148
         Vector m_vecBaseVelocity; // 0x154
-        QAngle m_angNetworkAngles   ; // 0x160
+        QAngle m_angNetworkAngles; // 0x160
         Vector m_vecNetworkOrigin; // 0x16C
         float m_flFriction; // 0x178
-        char __buf_0x17C[0xC]; //0x17C
-        char m_iName[MAX_PATH];
-        short m_nModelIndex;
-        unsigned char m_nRenderFX;
-        unsigned char m_nRenderMode;
-        unsigned char m_MoveType;
-        unsigned char m_MoveCollide;
-        unsigned char m_nWaterLevel;
-        char m_lifeState;
+        int moveparent;  // 0x17C
+        int m_hOwnerEntity; // 0x180
+        int m_hGroundEntity; // 0x184
+        char m_iName[MAX_PATH]; //0x188
+        short m_nModelIndex; //0x28C
+        unsigned char m_nRenderFX; //0x28E
+        unsigned char m_nRenderMode; //0x28F
+        unsigned char m_MoveType;  //0x290
+        unsigned char m_MoveCollide; //0x291
+        unsigned char m_nWaterLevel; //0x292
+        char m_lifeState; //0x293
+        float m_flAnimTime; //0x294
+        float m_flOldAnimTime; //0x298
+        float m_flSimulationTime; //0x29C
+        float m_flOldSimulationTime; //0x2A0
+        float m_flCreateTime; //0x2A4
+        unsigned char m_nOldRenderMode; //0x2A8
+        unsigned short m_hRender; //0x2A9
+        unsigned char m_VisibilityBits; //0x2AB
+        bool m_bReadyToDraw; //0x2AC
+        bool m_bClientSideRagdoll; //0x2AD
+        int m_nLastThinkTick; //0x2AE
+        char m_takedamage; //0x2B2
+        float m_flSpeed; //0x2B3
 };
 
 typedef struct {

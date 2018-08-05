@@ -1,14 +1,12 @@
 #pragma once
 
+#include "../process.h"
 #include "fbase.h"
-#include "../interfaces/iclient.h"
-#include "../memorymanager.h"
 
 class FGlow final : public FBase {
-    MemoryManager &m_mem;
-    IClient &m_client;
+    Process &m_mem;
     public:
-        FGlow(MemoryManager &mem, IClient &client);
+        FGlow(Process &mem) : m_mem(mem) {};
     protected:
         void Run();
 };

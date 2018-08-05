@@ -5,16 +5,18 @@
 #include <unordered_map>
 #include <sys/uio.h>
 
-class MemoryManager {
+class Process {
     public:
-        MemoryManager(const std::string &processName = "");
-        ~MemoryManager() {};
-        bool Attach(std::string processName = "");
-        bool ParseModules();
+        Process(const std::string &processName);
+        ~Process() = default;
+        bool Attach();
         bool IsValid();
+        bool ParseModules();
         uintptr_t GetCallAddress(uintptr_t address);
-        uintptr_t FindInModule(const std::string &moduleName, const std::string &pattern, size_t offset);
+        uintptr_t GetAbsoluteAddress(uintptr_t address, size_t offset, size_t size);
         uintptr_t GetModuleStart(const std::string &moduleName);
+        uintptr_t FindInModule(const std::string &moduleName, const std::string &pattern, size_t offset);
+        bool HasModule(const std::string &moduleName);
 
         template <class T>
         inline bool Read(void* address, T& value, ssize_t rlen = sizeof(T)) {
@@ -75,11 +77,11 @@ class MemoryManager {
             uintptr_t start;
             uintptr_t end;
         };
-        void InitHexLookup();
-        std::vector<uint8_t> HexToBin(const std::string &str);
         std::unordered_map<std::string, Module> m_modules;
         long m_pid = -1;
         char m_lookup[255];
         std::string m_processName;
+        std::vector<uint8_t> HexToBin(const std::string &str);
+        void InitHexLookup();
 };
 
