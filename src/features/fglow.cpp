@@ -41,9 +41,9 @@ void FGlow::Run()
 
     while (!ShouldStop()) {
         try {
-            std::array<struct iovec, 512> g_remote;
-            std::array<struct iovec, 512> g_local;
-            std::array<glow_t, 512> g_glow;
+            std::array<struct iovec, 1024> g_remote;
+            std::array<struct iovec, 1024> g_local;
+            std::array<glow_t, 1024> g_glow;
 
             CGlowObjectManager *manager = eng.GetGlowObjectManager();
 

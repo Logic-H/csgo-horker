@@ -42,7 +42,10 @@ struct GlowObjectDefinition_t
 
     void SetColor(const float rgba[4])
     {
-        memcpy(m_flGlowColor, rgba, sizeof(float) * 4);
+        m_flGlowColor[0] = rgba[0];
+        m_flGlowColor[1] = rgba[1];
+        m_flGlowColor[2] = rgba[2];
+        m_flGlowAlpha = rgba[3];
     }
 
     void SetRender(bool occluded, bool unoccluded)
