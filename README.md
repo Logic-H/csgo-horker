@@ -9,6 +9,7 @@ I'll keep a feature list here and update it as things change.  There isn't any c
 ### Current Features
 * Glow
 * Noflash
+* Trigger
 
 ### Compiling
 ##### Clone the repository
