@@ -57,10 +57,8 @@ CBaseEntity Engine::GetEntityById(int id)
         }
         return ent;
     } catch(const std::out_of_range &r) {
-        std::cout << r.what() << '\n';
         return ent;
     } catch(const std::runtime_error &e) {
-        std::cout << e.what() << '\n';
         return ent;
     }
 }
