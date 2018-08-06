@@ -55,7 +55,6 @@ CBaseEntity Engine::GetEntityById(int id)
         if (ePtr == 0 || !m_proc->Read(ePtr, ent)) {
             throw std::runtime_error("[Engine] GetEntityById failed.");
         }
-        std::cout << "ID: " << id << '\n';
         return ent;
     } catch(const std::out_of_range &r) {
         std::cout << r.what() << '\n';

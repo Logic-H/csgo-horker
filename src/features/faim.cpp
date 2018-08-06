@@ -39,8 +39,6 @@ void FAim::Run()
                             eng.ForceAttack(false);
                             WaitMs(delay);
                         }
-                    } else {
-                        Log("Entity Health < 1");
                     }
                 }
             } catch(std::runtime_error &e) {
