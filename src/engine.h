@@ -57,6 +57,7 @@ class Engine final {
         Engine& operator=(const Engine&) = delete;
         Engine(Engine&&) = delete;
         Engine& operator=(Engine&&) = delete;
+        void UpdateEntityList();
 
         Process *m_proc = nullptr;
         CBaseEntityList m_entitylist;

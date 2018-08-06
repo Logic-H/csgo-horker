@@ -46,6 +46,42 @@ void Engine::SetProcessManager(Process *proc)
     m_proc = proc;
 }
 
+CBaseEntity Engine::GetEntityById(int id)
+{
+    CBaseEntity ent;
+    ent.index = -1;
+    try {
+        void *ePtr = m_entitylist.GetEntityPtrById(id);
+        if (ePtr == 0 || !m_proc->Read(ePtr, ent)) {
+            throw std::runtime_error("[Engine] GetEntityById failed.");
+        }
+        std::cout << "ID: " << id << '\n';
+        return ent;
+    } catch(const std::out_of_range &r) {
+        std::cout << r.what() << '\n';
+        return ent;
+    } catch(const std::runtime_error &e) {
+        std::cout << e.what() << '\n';
+        return ent;
+    }
+}
+
+void Engine::UpdateEntityList()
+{
+    m_entitylist.Reset();
+    CEntInfo info;
+    m_proc->Read(Offset::Client::EntityList, info);
+    if (info.m_pPrev != NULL) {
+        std::cout << "Skipped elements!\n";
+    }
+    while (info.m_pNext != NULL) {
+        CBaseEntity ent;
+        m_proc->Read(info.m_pEntity, ent);
+        m_entitylist.AddEntInfo(ent.index, info);
+        m_proc->Read(info.m_pNext, info);
+    }
+}
+
 void Engine::Update(bool force)
 {
     if (m_proc == nullptr) {
@@ -55,7 +91,7 @@ void Engine::Update(bool force)
 
     if (force || m_updateTick >= 20) {
         m_updateTick = 0;
-        m_proc->Read(Offset::Client::EntityList, m_entitylist);
+        UpdateEntityList();
         m_proc->Read(Offset::Client::LocalPlayer, m_localplayer);
     }
 }
@@ -66,21 +102,6 @@ CGlowObjectManager *Engine::GetGlowObjectManager()
         throw std::runtime_error("Failed to get GlowObjectManager");
     }
     return &m_glowmanager;
-}
-
-inline void *Engine::GetEntityPtrById(int id)
-{
-    return m_entitylist.LookupEntityById(id);
-}
-
-CBaseEntity Engine::GetEntityById(int id)
-{
-    void *ptr = this->GetEntityPtrById(id);
-    CBaseEntity ent;
-    if (ptr == nullptr || !m_proc->Read(ptr, ent)) {
-        throw std::runtime_error("Failed to get Entity class by ID");
-    }
-    return ent;
 }
 
 uintptr_t Engine::GetLocalPlayer()

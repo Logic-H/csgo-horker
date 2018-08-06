@@ -1,6 +1,7 @@
 #pragma once
 
-#define NUM_ENT_ENTRIES (1<<13)
+#include <cstdint>
+#include <unordered_map>
 
 class CEntInfo {
     public:
@@ -12,20 +13,10 @@ class CEntInfo {
 
 class CBaseEntityList {
     public:
-        void *LookupEntityById(int id) const;
+        void AddEntInfo(int index, CEntInfo einfo);
+        void *GetEntityPtrById(int index);
+        void Reset();
+        size_t Count();
     private:
-        class CEntInfoList {
-            public:
-                const CEntInfo *Head() const { return m_pHead; }
-                const CEntInfo *Tail() const { return m_pTail; }
-                CEntInfo *Head() { return m_pHead; }
-                CEntInfo *Tail() { return m_pTail; }
-            private:
-                CEntInfo *m_pHead;
-                CEntInfo *m_pTail;
-        };
-        CEntInfo m_EntPtrArray[NUM_ENT_ENTRIES];
-        CEntInfoList m_activeList;
-        CEntInfoList m_freeNonNetworkableList;
+        std::unordered_map<int, CEntInfo> m_entinfo;
 };
-
