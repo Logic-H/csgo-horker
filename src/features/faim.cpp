@@ -16,33 +16,44 @@ void FAim::Run()
     auto& eng = Engine::GetInstance();
     
     while (!ShouldStop()) {
+        uintptr_t localPlayer;
+        if (!m_mem.Read(Offset::Client::LocalPlayer, &localPlayer)) {
+            LogWait("[FAim] Failed to read local player address.");
+            continue;
+        }
+
         if (!eng.IsKeyDown(triggerKey) && Config::AimBot::UseTriggerKey) {
             WaitMs(20);
             continue;
         }
         if (Config::AimBot::Trigger) {
-            try {
-                int myTeam = eng.GetLocalPlayerTeam();
-                int inCrossID = eng.GetLocalPlayerVariable<int>(OFF_INCROSSHAIRID);
+            int myTeam;
+            if (!m_mem.Read(localPlayer + Netvar::CBaseEntity::m_iTeamNum, &myTeam)) {
+                WaitMs(20);
+                continue;
+            }
 
-                if (inCrossID > 0) {
-                    CBaseEntity ent = eng.GetEntityById(inCrossID);
-                    if (ent.index == -1) {
-                        WaitMs(20);
-                        continue;
-                    }
-                    if (ent.m_iHealth > 0) {
-                        if (ent.m_iTeamNum != myTeam) {
-                            size_t delay = 10 + (rand() % 90);
-                            eng.ForceAttack(true);
-                            WaitMs(10);
-                            eng.ForceAttack(false);
-                            WaitMs(delay);
-                        }
+            int inCrossID;
+            if (!m_mem.Read(localPlayer + OFF_INCROSSHAIRID, &inCrossID)) {
+                LogWait("[FAim/Trigger] Failed to read crosshair ID");
+                continue;
+            }
+
+            if (inCrossID > 0 && inCrossID < 65) {
+                CBaseEntity ent;
+                if (!eng.GetEntityById(inCrossID, &ent)) {
+                    WaitMs(20);
+                    continue;
+                }
+                if (ent.m_iHealth > 0) {
+                    if (ent.m_iTeamNum != myTeam) {
+                        size_t delay = 10 + (rand() % 90);
+                        eng.ForceAttack(true);
+                        WaitMs(10);
+                        eng.ForceAttack(false);
+                        WaitMs(delay);
                     }
                 }
-            } catch(std::runtime_error &e) {
-                LogWait(e.what());
             }
         }
         WaitMs(1);

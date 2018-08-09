@@ -22,8 +22,7 @@ class Engine final {
 
         // Entity List
         const CBaseEntityList &GetEntityList() const;
-        void *GetEntityPtrById(int id);
-        CBaseEntity GetEntityById(int id);
+        bool GetEntityById(int id, CBaseEntity* ent);
 
         // Local Player
         template <typename T>

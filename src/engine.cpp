@@ -46,21 +46,15 @@ void Engine::SetProcessManager(Process *proc)
     m_proc = proc;
 }
 
-CBaseEntity Engine::GetEntityById(int id)
+bool Engine::GetEntityById(int id, CBaseEntity* ent)
 {
-    CBaseEntity ent;
-    ent.index = -1;
-    try {
-        void *ePtr = m_entitylist.GetEntityPtrById(id);
-        if (ePtr == 0 || !m_proc->Read(ePtr, &ent)) {
-            throw std::runtime_error("[Engine] GetEntityById failed.");
+    uintptr_t aEntity = m_entitylist.GetEntityPtrById(id);
+    if (aEntity != 0) {
+        if (m_proc->Read(aEntity, ent)) {
+            return true;
         }
-        return ent;
-    } catch(const std::out_of_range &r) {
-        return ent;
-    } catch(const std::runtime_error &e) {
-        return ent;
     }
+    return false;
 }
 
 void Engine::UpdateEntityList()

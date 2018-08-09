@@ -5,7 +5,7 @@
 
 class CEntInfo {
     public:
-        void *m_pEntity;
+        uintptr_t m_pEntity;
         long m_SerialNumber;
         CEntInfo *m_pPrev;
         CEntInfo *m_pNext;
@@ -14,7 +14,7 @@ class CEntInfo {
 class CBaseEntityList {
     public:
         void AddEntInfo(int index, CEntInfo einfo);
-        void *GetEntityPtrById(int index);
+        uintptr_t GetEntityPtrById(int index);
         void Reset();
         size_t Count();
     private:

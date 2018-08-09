@@ -16,8 +16,12 @@ void CBaseEntityList::AddEntInfo(int index, CEntInfo info)
     m_entinfo.emplace(std::make_pair(index, info));
 }
 
-void *CBaseEntityList::GetEntityPtrById(int index)
+uintptr_t CBaseEntityList::GetEntityPtrById(int index)
 {
-    CEntInfo& info = m_entinfo.at(index);
-    return info.m_pEntity;
+    try {
+        CEntInfo& info = m_entinfo.at(index);
+        return info.m_pEntity;
+    } catch (std::out_of_range& e) {
+        return 0;
+    }
 }
