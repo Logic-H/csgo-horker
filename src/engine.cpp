@@ -87,33 +87,6 @@ void Engine::Update(bool force)
     }
 }
 
-CGlowObjectManager *Engine::GetGlowObjectManager()
-{
-    if (!m_proc->Read(Offset::Client::GlowObjectManager, &m_glowmanager)) {
-        throw std::runtime_error("Failed to get GlowObjectManager");
-    }
-    return &m_glowmanager;
-}
-
-uintptr_t Engine::GetLocalPlayer()
-{
-    uintptr_t localPlayer = 0;
-    if (!m_proc->Read(Offset::Client::LocalPlayer, &localPlayer)) {
-        throw std::runtime_error("Failed to get local player address");
-    }
-    return localPlayer;
-}
-
-int Engine::GetLocalPlayerTeam()
-{
-    return this->GetLocalPlayerVariable<int>(OFF_TEAM);
-}
-
-const CBaseEntityList &Engine::GetEntityList() const
-{
-    return m_entitylist;
-}
-
 void Engine::ForceAttack(bool enabled)
 {
     if (!m_proc->Write(Offset::Client::ForceAttack, enabled)) {

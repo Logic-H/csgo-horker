@@ -17,35 +17,9 @@ class Engine final {
         bool IsKeyDown(int keyCode);
         static int StringToKeycode(std::string keyString);
 
-        // Glow
-        CGlowObjectManager *GetGlowObjectManager();
-
         // Entity List
         const CBaseEntityList &GetEntityList() const;
         bool GetEntityById(int id, CBaseEntity* ent);
-
-        // Local Player
-        template <typename T>
-        inline T GetLocalPlayerVariable(uintptr_t offset) {
-            T retValue;
-            if (!m_proc->Read(m_localplayer + offset, &retValue)) {
-                std::string eMsg = "[Engine/LocalPlayer] Failed to read offset " + std::to_string(offset);
-                throw std::runtime_error(eMsg);
-            }
-            return retValue;
-        }
-
-        template <typename T>
-        void SetLocalPlayerVariable(uintptr_t offset, T value) {
-            if (!m_proc->Write<T>(m_localplayer + offset, value)) {
-                std::string eMsg = "[Engine/LocalPlayer] Failed to write offset" + std::to_string(offset);
-                throw std::runtime_error(eMsg);
-            }
-        }
-
-        uintptr_t GetLocalPlayer();
-        CBaseEntity GetLocalPlayerEntity();
-        int GetLocalPlayerTeam();
 
         // Useful things
         void ForceAttack(bool enabled);
