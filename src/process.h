@@ -19,52 +19,29 @@ class Process {
         bool HasModule(const std::string &moduleName);
 
         template <class T>
-        inline bool Read(void* address, T& value, ssize_t rlen = sizeof(T)) {
-            struct iovec local[1];
-            struct iovec remote[1];
-            ssize_t nread;
-
-            local[0].iov_base = reinterpret_cast<void*>(&value);
-            local[0].iov_len = rlen;
-            remote[0].iov_base = address;
-            remote[0].iov_len = rlen;
-
-            nread = process_vm_readv(m_pid, local, 1, remote, 1, 0);
-            return (nread == rlen);
+        inline bool Read(void* addr, T* out, size_t len = sizeof(T)) {
+            struct iovec local = {out, len};
+            struct iovec remote = {addr, len};
+            return (process_vm_readv(m_pid, &local, 1, &remote, 1, 0) ==
+                    static_cast<ssize_t>(len));
         }
 
         template <class T>
-        inline bool Read(uintptr_t address, T& value, ssize_t rlen = sizeof(T))
+        inline bool Read(uintptr_t addr, T* out, size_t len = sizeof(T))
         {
-            return this->Read(reinterpret_cast<void*>(address), value, rlen);
-            struct iovec local[1];
-            struct iovec remote[1];
-            ssize_t nread;
-
-            local[0].iov_base = reinterpret_cast<void*>(&value);
-            local[0].iov_len = rlen;
-            remote[0].iov_base = reinterpret_cast<void*>(address);
-            remote[0].iov_len = rlen;
-
-            nread = process_vm_readv(m_pid, local, 1, remote, 1, 0);
-            return (nread == rlen);
+            struct iovec local = {out, len};
+            struct iovec remote = {reinterpret_cast<void*>(addr), len};
+            return (process_vm_readv(m_pid, &local, 1, &remote, 1, 0) ==
+                    static_cast<ssize_t>(len));
         }
 
         template <class T>
-        inline bool Write(uintptr_t address, T value, ssize_t rlen = sizeof(T))
+        inline bool Write(uintptr_t addr, T value, size_t len = sizeof(T))
         {
-            T tempValue = value;
-            struct iovec local[1];
-            struct iovec remote[1];
-            ssize_t nread;
-
-            local[0].iov_base = reinterpret_cast<void*>(&tempValue);
-            local[0].iov_len = rlen;
-            remote[0].iov_base = reinterpret_cast<void*>(address);
-            remote[0].iov_len = rlen;
-
-            nread = process_vm_writev(m_pid, local, 1, remote, 1, 0);
-            return (nread == rlen);
+            struct iovec local = {reinterpret_cast<void*>(&value), len};
+            struct iovec remote = {reinterpret_cast<void*>(addr), len};
+            return (process_vm_writev(m_pid, &local, 1, &remote, 1, 0) ==
+                    static_cast<ssize_t>(len));
         }
 
         inline void WriteMulti(struct iovec *local, struct iovec *remote, size_t count)

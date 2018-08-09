@@ -90,7 +90,7 @@ int main()
     bool isConnected = false;
 
     while (!shouldQuit) {
-        if (!proc.IsValid() || !proc.Read(aIsConnected, isConnected)) {
+        if (!proc.IsValid() || !proc.Read(aIsConnected, &isConnected)) {
             shouldQuit = true;
             LOG("Lost connection to process... Exiting.\n");
             break;
@@ -107,7 +107,7 @@ int main()
             fvisual.Start();
 
             while (isConnected && !shouldQuit) {
-                proc.Read(aIsConnected, isConnected);
+                proc.Read(aIsConnected, &isConnected);
                 eng.Update();
                 std::this_thread::sleep_for(std::chrono::milliseconds(50));
             }

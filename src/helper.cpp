@@ -60,8 +60,8 @@ bool FindOffsets(Process &mem)
 
     uintptr_t entityListMov = FindInClient(mem, EntityList);
     uintptr_t entityList = mem.GetAbsoluteAddress(entityListMov, 3, 7);
-    mem.Read(entityList, entityList);
-    mem.Read(entityList, entityList);
+    mem.Read(entityList, &entityList);
+    mem.Read(entityList, &entityList);
     Offset::Client::EntityList = entityList + 0x8;
 
     uintptr_t connectedMov = FindInEngine(mem, IsConnected);

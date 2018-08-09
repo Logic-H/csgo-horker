@@ -52,7 +52,7 @@ CBaseEntity Engine::GetEntityById(int id)
     ent.index = -1;
     try {
         void *ePtr = m_entitylist.GetEntityPtrById(id);
-        if (ePtr == 0 || !m_proc->Read(ePtr, ent)) {
+        if (ePtr == 0 || !m_proc->Read(ePtr, &ent)) {
             throw std::runtime_error("[Engine] GetEntityById failed.");
         }
         return ent;
@@ -67,15 +67,15 @@ void Engine::UpdateEntityList()
 {
     m_entitylist.Reset();
     CEntInfo info;
-    m_proc->Read(Offset::Client::EntityList, info);
+    m_proc->Read(Offset::Client::EntityList, &info);
     if (info.m_pPrev != NULL) {
         std::cout << "Skipped elements!\n";
     }
     while (info.m_pNext != NULL) {
         CBaseEntity ent;
-        m_proc->Read(info.m_pEntity, ent);
+        m_proc->Read(info.m_pEntity, &ent);
         m_entitylist.AddEntInfo(ent.index, info);
-        m_proc->Read(info.m_pNext, info);
+        m_proc->Read(info.m_pNext, &info);
     }
 }
 
@@ -89,13 +89,13 @@ void Engine::Update(bool force)
     if (force || m_updateTick >= 20) {
         m_updateTick = 0;
         UpdateEntityList();
-        m_proc->Read(Offset::Client::LocalPlayer, m_localplayer);
+        m_proc->Read(Offset::Client::LocalPlayer, &m_localplayer);
     }
 }
 
 CGlowObjectManager *Engine::GetGlowObjectManager()
 {
-    if (!m_proc->Read(Offset::Client::GlowObjectManager, m_glowmanager)) {
+    if (!m_proc->Read(Offset::Client::GlowObjectManager, &m_glowmanager)) {
         throw std::runtime_error("Failed to get GlowObjectManager");
     }
     return &m_glowmanager;
@@ -104,7 +104,7 @@ CGlowObjectManager *Engine::GetGlowObjectManager()
 uintptr_t Engine::GetLocalPlayer()
 {
     uintptr_t localPlayer = 0;
-    if (!m_proc->Read(Offset::Client::LocalPlayer, localPlayer)) {
+    if (!m_proc->Read(Offset::Client::LocalPlayer, &localPlayer)) {
         throw std::runtime_error("Failed to get local player address");
     }
     return localPlayer;

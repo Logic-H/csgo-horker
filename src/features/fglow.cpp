@@ -50,7 +50,7 @@ void FGlow::Run()
             const size_t count = manager->Count();
             void *data_ptr = manager->Data();
 
-            if (!m_mem.Read(data_ptr, g_glow, sizeof(glow_t) * count)) {
+            if (!m_mem.Read(data_ptr, &g_glow, sizeof(glow_t) * count)) {
                 LogWait("[Glow] Failed to read m_GlowObjectDefinitions");
                 continue;
             }
@@ -61,7 +61,7 @@ void FGlow::Run()
             for (size_t i = 1; i < count; ++i) {
                 if (g_glow[i].m_pEntity != NULL) {
                     CBaseEntity ent;
-                    if (m_mem.Read(g_glow[i].m_pEntity, ent)) {
+                    if (m_mem.Read(g_glow[i].m_pEntity, &ent)) {
                         if (g_glow[i].m_bRenderWhenOccluded) {
                             continue;
                         }

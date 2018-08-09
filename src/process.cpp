@@ -184,7 +184,7 @@ uintptr_t Process::FindInModule(const std::string &moduleName, const std::string
         uintptr_t readaddr = module.start + (chunksize * chunknum);
         memset(buffer, 0, chunksize);
 
-        if (this->Read(readaddr, buffer, readsize)) {
+        if (this->Read(readaddr, &buffer, readsize)) {
             for (uintptr_t b = 0; b < readsize; b++) {
                 size_t matches = 0;
                 while (buffer[b + matches] == bp[matches] || pattern[matches*3] == '?') {
@@ -210,7 +210,7 @@ uintptr_t Process::GetCallAddress(uintptr_t address)
 uintptr_t Process::GetAbsoluteAddress(uintptr_t address, size_t offset, size_t size)
 {
     uintptr_t code = 0;
-    if (this->Read(address + offset, code, sizeof(unsigned int))) {
+    if (this->Read(address + offset, &code, sizeof(unsigned int))) {
         return address + code + size;
     }
 

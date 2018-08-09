@@ -29,7 +29,7 @@ class Engine final {
         template <typename T>
         inline T GetLocalPlayerVariable(uintptr_t offset) {
             T retValue;
-            if (!m_proc->Read(m_localplayer + offset, retValue)) {
+            if (!m_proc->Read(m_localplayer + offset, &retValue)) {
                 std::string eMsg = "[Engine/LocalPlayer] Failed to read offset " + std::to_string(offset);
                 throw std::runtime_error(eMsg);
             }

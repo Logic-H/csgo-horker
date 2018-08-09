@@ -1,28 +1,17 @@
 #pragma once
 
-#include "cutlmemory.h"
-template <class T, class A = CUtlMemory<T>> class CUtlVector
-{
-	typedef A CAllocator;
+#include <cstdint>
 
-	public:
-		T& operator[](int i)
-		{
-			return m_Memory[i];
-		}
-
-        T* Data()
-        {
-            return m_pElements;
-        }
-
-		int Count() const
-		{
-			return m_Size;
-		}
-	protected:
-		CAllocator m_Memory;
-		int m_Size;
-		T* m_pElements;
+template <typename T>
+class CUtlVector {
+    public:
+        size_t Count() { return m_nMaxSize; }
+        T* Data() { return m_pData; }
+    private:
+    T* m_pData;
+    uint32_t m_nMaxSize;
+    uint32_t unk1;
+    uint32_t m_nCount;
+    uint32_t m_pDataPtrBack;
 };
 
