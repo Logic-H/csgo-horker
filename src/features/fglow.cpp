@@ -41,16 +41,20 @@ void FGlow::Run()
 
     while (!ShouldStop()) {
         try {
-            std::array<struct iovec, 1024> g_remote;
-            std::array<struct iovec, 1024> g_local;
-            std::array<glow_t, 1024> g_glow;
+            std::array<struct iovec, 1024> g_remote = {};
+            std::array<struct iovec, 1024> g_local = {};
+            std::array<glow_t, 1024> g_glow = {};
 
-            CGlowObjectManager *manager = eng.GetGlowObjectManager();
+            CGlowObjectManager manager;
+            if (!m_mem.Read(Offset::Client::GlowObjectManager, &manager)) {
+                LogWait("[Glow] Failed to read GlowObjectManager");
+                continue;
+            }
 
-            const size_t count = manager->Count();
-            void *data_ptr = manager->Data();
+            const size_t count = manager.Count();
+            const uintptr_t aGlowData = manager.Data();
 
-            if (!m_mem.Read(data_ptr, &g_glow, sizeof(glow_t) * count)) {
+            if (!m_mem.Read(aGlowData, g_glow.data(), sizeof(glow_t) * count)) {
                 LogWait("[Glow] Failed to read m_GlowObjectDefinitions");
                 continue;
             }
@@ -59,43 +63,44 @@ void FGlow::Run()
             
             size_t writeCount = 0;
             for (size_t i = 1; i < count; ++i) {
-                if (g_glow[i].m_pEntity != NULL) {
-                    CBaseEntity ent;
-                    if (m_mem.Read(g_glow[i].m_pEntity, &ent)) {
-                        if (g_glow[i].m_bRenderWhenOccluded) {
+                if (g_glow[i].m_pEntity == 0)
+                    continue;
+                CBaseEntity ent;
+                if (!m_mem.Read(g_glow[i].m_pEntity, &ent))
+                    continue;
+                if (g_glow[i].m_bRenderWhenOccluded)
+                    continue;
+                if (bLegitGlow) {
+                    g_glow[i].m_nGlowStyle = 2;
+                }
+                switch(ent.m_iTeamNum) {
+                    case TEAM_SPEC:
+                    case TEAM_NONE:
+                        if (!bGlowOther)
+                            continue;
+                        g_glow[i].SetRender(true, false);
+                        g_glow[i].SetColor(clrO);
+                        break;
+                    case TEAM_T:
+                    case TEAM_CT:
+                        if (bGlowAllies && ent.m_iTeamNum == myTeam) {
+                            if (ent.m_iHealth < 1 && !bGlowWeapons)
+                                continue;
+                            g_glow[i].SetRender(true, false);
+                            g_glow[i].SetColor(clrA);
+                        } else if (bGlowEnemies && ent.m_iTeamNum != myTeam) {
+                            if (ent.m_iHealth < 1 && !bGlowWeapons)
+                                continue;
+                            g_glow[i].SetRender(true, false);
+                            g_glow[i].SetColor(clrE);
+                        } else {
                             continue;
                         }
-                        if (bLegitGlow) {
-                            g_glow[i].m_nGlowStyle = 2;
-                        }
-                        if (ent.m_iTeamNum == TEAM_SPEC || ent.m_iTeamNum == TEAM_NONE) {
-                            if (!bGlowOther) {
-                                continue;
-                            }
-                            g_glow[i].SetRender(true, false);
-                            g_glow[i].SetColor(clrO);
-                        } else if (ent.m_iTeamNum == TEAM_T || ent.m_iTeamNum == TEAM_CT) {
-                            if (bGlowAllies && ent.m_iTeamNum == myTeam) {
-                                if (ent.m_iHealth < 1 && !bGlowWeapons) {
-                                    continue;
-                                }
-                                g_glow[i].SetRender(true, false);
-                                g_glow[i].SetColor(clrA);
-                            } else if (bGlowEnemies && ent.m_iTeamNum != myTeam) {
-                                if (ent.m_iHealth < 1 && !bGlowWeapons) {
-                                    continue;
-                                }
-                                g_glow[i].SetRender(true, false);
-                                g_glow[i].SetColor(clrE);
-                            } else {
-                                continue;
-                            }
-                        }
-                    }
+                        break;
                 }
 
                 g_remote[writeCount].iov_base =
-                    ((uint8_t*)data_ptr + (sizeof(glow_t) * i)) + glow_t::WriteStart();
+                    ((uint8_t*)aGlowData + (sizeof(glow_t) * i)) + glow_t::WriteStart();
                 g_local[writeCount].iov_base = ((uint8_t*)&g_glow[i]) + glow_t::WriteStart();
                 g_remote[writeCount].iov_len = glow_t::WriteSize();
                 g_local[writeCount].iov_len = glow_t::WriteSize();

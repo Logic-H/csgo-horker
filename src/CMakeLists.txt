@@ -8,7 +8,6 @@ add_executable(horker
     features/fbase.cpp
     features/fglow.cpp
     features/fvisual.cpp
-    sdk/cbaseentity.cpp
     sdk/centitylist.cpp
 )
 

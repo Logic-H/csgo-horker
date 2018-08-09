@@ -11,41 +11,18 @@
 
 struct GlowObjectDefinition_t
 {
-    bool ShouldDraw( int nSlot ) const
-    {
-        return m_pEntity && ( m_nSplitScreenSlot == -1 || m_nSplitScreenSlot == nSlot ) && ( m_bRenderWhenOccluded || m_bRenderWhenUnoccluded );
-    }
-
-    bool IsUnused() const
-    {
-        return m_nNextFreeSlot != ENTRY_IN_USE;
-    }
-
-    static inline size_t WriteStart()
-    {
+    static inline size_t WriteStart() {
         return offsetof(struct GlowObjectDefinition_t, m_flGlowColor);
     }
 
-    static inline size_t WriteSize()
-    {
+    static inline size_t WriteSize() {
         return offsetof(struct GlowObjectDefinition_t, m_nSplitScreenSlot) -
                offsetof(struct GlowObjectDefinition_t, m_flGlowColor);
     }
 
-    void SetColor(float r, float g, float b, float a)
-    {
-        m_flGlowColor[0] = r;
-        m_flGlowColor[1] = g;
-        m_flGlowColor[2] = b;
-        m_flGlowAlpha = a;
-    }
-
-    void SetColor(const float rgba[4])
-    {
-        m_flGlowColor[0] = rgba[0];
-        m_flGlowColor[1] = rgba[1];
-        m_flGlowColor[2] = rgba[2];
-        m_flGlowAlpha = rgba[3];
+    void SetColor(const float rgba[4]) {
+        constexpr int clrSize = sizeof(float) * 4;
+        memcpy(m_flGlowColor, rgba, clrSize);
     }
 
     void SetRender(bool occluded, bool unoccluded)
@@ -54,7 +31,7 @@ struct GlowObjectDefinition_t
         m_bRenderWhenUnoccluded = unoccluded;
     }
 
-    CBaseEntity* m_pEntity;
+    uintptr_t m_pEntity;
     float m_flGlowColor[3];
     float m_flGlowAlpha;
     char  unknown[4];
@@ -79,7 +56,7 @@ public:
         return m_GlowObjectDefinitions.Count();
     }
 
-    GlowObjectDefinition_t *Data() {
+    uintptr_t Data() {
         return m_GlowObjectDefinitions.Data();
     }
     unsigned int UNK() {
