@@ -6,19 +6,24 @@
 
 void FVisual::Run()
 {
-    auto& eng = Engine::GetInstance();
     Log("[FVisual] Started");
 
     while (!ShouldStop()) {
-        try {
-            if (Config::Visual::NoFlash) {
-                float fFlashDuration = eng.GetLocalPlayerVariable<float>(OFF_FLASHDURATION);
-                if (fFlashDuration > 0.f) {
-                    eng.SetLocalPlayerVariable(OFF_FLASHDURATION, 0.f);
-                }
+        uintptr_t localPlayer;
+        if (!m_mem.Read(Offset::Client::LocalPlayer, &localPlayer)) {
+            LogWait("[FVisual] Failed to get local player address");
+            continue;
+        }
+
+        if (Config::Visual::NoFlash) {
+            float fFlashDuration;
+            if (!m_mem.Read(localPlayer + OFF_FLASHDURATION, &fFlashDuration)) {
+                Wait();
+                continue;
             }
-        } catch (std::runtime_error &e) {
-            LogWait(e.what());
+            if (fFlashDuration > 0.f) {
+                m_mem.Write(localPlayer + OFF_FLASHDURATION, 0.f);
+            }
         }
         WaitMs(20);
     }
