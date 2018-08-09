@@ -20,3 +20,10 @@ namespace Offset {
         OFFSET(IsConnected);
     };
 };
+
+namespace Netvar {
+    namespace CBaseEntity {
+        constexpr size_t index = 0x94;
+        constexpr size_t m_iTeamNum = 0x128;
+    };
+};

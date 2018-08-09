@@ -25,9 +25,8 @@
 
 bool shouldQuit = false;
 
-void exitHandle(int s)
+void exitHandle(int)
 {
-    std::cout << "\nCaught signal: " << s << '\n';
     shouldQuit = true;
 }
 
