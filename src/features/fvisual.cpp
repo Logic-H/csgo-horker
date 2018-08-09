@@ -16,13 +16,13 @@ void FVisual::Run()
         }
 
         if (Config::Visual::NoFlash) {
-            float fFlashDuration;
-            if (!m_mem.Read(localPlayer + OFF_FLASHDURATION, &fFlashDuration)) {
+            float fDuration;
+            if (!m_mem.Read(localPlayer + Netvar::CBasePlayer::m_flFlashDuration, &fDuration)) {
                 Wait();
                 continue;
             }
-            if (fFlashDuration > 0.f) {
-                m_mem.Write(localPlayer + OFF_FLASHDURATION, 0.f);
+            if (fDuration > 0.f) {
+                m_mem.Write(localPlayer + Netvar::CBasePlayer::m_flFlashDuration, 0.f);
             }
         }
         WaitMs(20);

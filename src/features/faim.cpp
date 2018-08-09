@@ -34,7 +34,7 @@ void FAim::Run()
             }
 
             int inCrossID;
-            if (!m_mem.Read(localPlayer + OFF_INCROSSHAIRID, &inCrossID)) {
+            if (!m_mem.Read(localPlayer + Netvar::CBasePlayer::m_iCrosshairID, &inCrossID)) {
                 LogWait("[FAim/Trigger] Failed to read crosshair ID");
                 continue;
             }
