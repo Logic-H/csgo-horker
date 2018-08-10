@@ -29,6 +29,8 @@ struct GlowObjectDefinition_t
     {
         m_bRenderWhenOccluded = occluded;
         m_bRenderWhenUnoccluded = unoccluded;
+        m_nSplitScreenSlot = -1;
+        m_flBloomAmount = 1.f;
     }
 
     uintptr_t m_pEntity;
@@ -47,7 +49,7 @@ struct GlowObjectDefinition_t
     int   m_nSplitScreenSlot;
     int   m_nNextFreeSlot;
 
-}; // sizeof() == 0x34
+}; // sizeof() == 0x3c
 
 class CGlowObjectManager
 {

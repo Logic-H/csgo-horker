@@ -25,7 +25,14 @@ float Config::Glow::AllyA     = 0.8f;
 
 bool  Config::Visual::NoFlash = true;
 
+bool  Config::AimBot::AimAssist = true;
+float Config::AimBot::AimCorrection = 0.4f;
+float Config::AimBot::AimFieldOfView = 35.2f;
+float Config::AimBot::AimSpeed = 5.0f;
+int   Config::AimBot::TargetMode = 1;
+int   Config::AimBot::TargetBone = 8;
 bool  Config::AimBot::Trigger = true;
+int   Config::AimBot::TriggerDelay = 50;
 bool  Config::AimBot::UseTriggerKey = true;
 std::string Config::AimBot::TriggerKey = "F";
 
@@ -34,14 +41,40 @@ std::string Config::AimBot::TriggerKey = "F";
 #define WritePair(section, key) \
     conf << #key " = " << Config::section::key << "\n";
 #define WriteSectionEnd() conf << "\n";
+#define WriteComment(msg) conf << "; " << msg << '\n';
 
-void WriteDefaultConfig()
+void UpdateConfig()
 {
     std::ofstream conf(defConfigFile);
     if (conf.is_open()) {
         WriteSection(AimBot);
+        WriteComment("Enable Aim Assist: 1/0");
+        WritePair(AimBot, AimAssist);
+        WriteComment("Aim correction (Higher values reduce jitter w/ high mouse sensitivity)");
+        WritePair(AimBot, AimCorrection);
+        WriteComment("Aim field of view (float) - Adjustments for TargetMode = 1");
+        WritePair(AimBot, AimFieldOfView);
+        WriteComment("Aim smoothing as a floating point (lower looks more legit)");
+        WritePair(AimBot, AimSpeed);
+        WriteComment("TargetMode Valid List:");
+        WriteComment("-- Nearest: 0");
+        WriteComment("-- FOV: 1");
+        WritePair(AimBot, TargetMode);
+
+        WriteComment("TargetBone Valid List:");
+        WriteComment("-- Head = 8");
+        WriteComment("-- Neck = 7");
+        WriteComment("-- Torso = 3, 4, 5, or 6");
+        WriteComment("-- Pelvis = 2");
+
+        WritePair(AimBot, TargetBone);
+        WriteComment("Enable auto-trigger: 1/0");
         WritePair(AimBot, Trigger);
+        WriteComment("Delay between shots in milliseconds");
+        WritePair(AimBot, TriggerDelay);
+        WriteComment("Use trigger key for Aim/Trigger (Recommended on)");
         WritePair(AimBot, UseTriggerKey);
+        WriteComment("Keyboard key to use for Aim/Trigger (Default is F)");
         WritePair(AimBot, TriggerKey);
         WriteSectionEnd();
 
@@ -74,17 +107,25 @@ void WriteDefaultConfig()
     Config::section::key = reader.Get(#section, #key, Config::section::key);
 #define RCDBL(section, key) \
     Config::section::key = reader.GetReal(#section, #key, Config::section::key);
-
+#define RCINT(section, key) \
+    Config::section::key = reader.GetInteger(#section, #key, Config::section::key);
 bool ReadConfig(const std::string &configFile)
 {
     INIReader reader(configFile);
 
     if (reader.ParseError() < 0) {
-        WriteDefaultConfig();
+        UpdateConfig();
         return false;
     }
     
+    RCBOOL(AimBot, AimAssist);
+    RCDBL(AimBot, AimCorrection);
+    RCDBL(AimBot, AimFieldOfView);
+    RCDBL(AimBot, AimSpeed);
+    RCINT(AimBot, TargetMode);
+    RCINT(AimBot, TargetBone);
     RCBOOL(AimBot, Trigger);
+    RCINT(AimBot, TriggerDelay);
     RCSTR (AimBot, TriggerKey);
     RCBOOL(AimBot, UseTriggerKey);
 
@@ -104,5 +145,6 @@ bool ReadConfig(const std::string &configFile)
     RCDBL (Glow, AllyA);
 
     RCBOOL(Visual, NoFlash);
+    UpdateConfig();
     return true;
 }

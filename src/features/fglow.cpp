@@ -71,8 +71,8 @@ void FGlow::Run()
         }
         
         size_t writeCount = 0;
-        for (size_t i = 1; i < count; ++i) {
-            if (g_glow[i].m_pEntity == 0 || g_glow[i].m_bRenderWhenOccluded)
+        for (size_t i = 0; i < count; ++i) {
+            if (g_glow[i].m_pEntity == 0)
                 continue;
             CBaseEntity ent;
             if (!m_mem.Read(g_glow[i].m_pEntity, &ent))
@@ -105,7 +105,6 @@ void FGlow::Run()
                     }
                     break;
             }
-
             g_remote[writeCount].iov_base =
                 ((uint8_t*)aGlowData + (sizeof(glow_t) * i)) + glow_t::WriteStart();
             g_local[writeCount].iov_base = ((uint8_t*)&g_glow[i]) + glow_t::WriteStart();

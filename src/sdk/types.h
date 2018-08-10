@@ -1,12 +1,5 @@
 #pragma once
 
-typedef struct
-{
-    float x;
-    float y;
-    float z;
-} Vector;
-
 typedef struct {
     unsigned char _color[4];
 } Color;

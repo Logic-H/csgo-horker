@@ -6,7 +6,14 @@ bool ReadConfig(const std::string &configFile);
 
 namespace Config {
     namespace AimBot {
+        extern bool        AimAssist;
+        extern float       AimCorrection;
+        extern float       AimFieldOfView;
+        extern float       AimSpeed;
+        extern int         TargetMode;
+        extern int         TargetBone;
         extern bool        Trigger;
+        extern int         TriggerDelay;
         extern bool        UseTriggerKey;
         extern std::string TriggerKey;
     };

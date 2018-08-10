@@ -13,6 +13,7 @@ add_executable(horker
 
 target_link_libraries(horker
     ${X11_LIBRARIES}
+    ${X11_XTest_LIB}
     Threads::Threads
 )
 

@@ -2,6 +2,7 @@
 
 #include "types.h"
 #include "basetypes.h"
+#include "vector.h"
 
 #define MAX_PATH 260
 

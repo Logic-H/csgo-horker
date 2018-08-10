@@ -6,6 +6,8 @@
 #include "process.h"
 
 #include <iostream>
+#include <mutex>
+#include <thread>
 
 class Engine final {
     public:
@@ -20,6 +22,7 @@ class Engine final {
         // Entity List
         const CBaseEntityList &GetEntityList() const;
         bool GetEntityById(int id, CBaseEntity* ent);
+        bool GetEntityPtrById(int id, uintptr_t* out);
 
         // Useful things
         void ForceAttack(bool enabled);
@@ -38,4 +41,5 @@ class Engine final {
 
         CGlowObjectManager m_glowmanager;
         uintptr_t m_localplayer;
+        std::mutex m_entitymutex;
 };

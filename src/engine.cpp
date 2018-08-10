@@ -11,7 +11,9 @@ static Display *internDpy = nullptr;
 
 Engine &Engine::GetInstance()
 {
-    internDpy = XOpenDisplay(NULL);
+    if (internDpy == nullptr) {
+        internDpy = XOpenDisplay(NULL);
+    }
     if (internDpy == nullptr) {
         throw std::runtime_error("Failed to open display");
     }
@@ -48,6 +50,7 @@ void Engine::SetProcessManager(Process *proc)
 
 bool Engine::GetEntityById(int id, CBaseEntity* ent)
 {
+    std::lock_guard<std::mutex> guard(m_entitymutex);
     uintptr_t aEntity = m_entitylist.GetEntityPtrById(id);
     if (aEntity != 0) {
         if (m_proc->Read(aEntity, ent)) {
@@ -57,8 +60,16 @@ bool Engine::GetEntityById(int id, CBaseEntity* ent)
     return false;
 }
 
+bool Engine::GetEntityPtrById(int id, uintptr_t* out)
+{
+    std::lock_guard<std::mutex> guard(m_entitymutex);
+    *out = m_entitylist.GetEntityPtrById(id);
+    return (*out != 0);
+}
+
 void Engine::UpdateEntityList()
 {
+    std::lock_guard<std::mutex> guard(m_entitymutex);
     m_entitylist.Reset();
     CEntInfo info;
     m_proc->Read(Offset::Client::EntityList, &info);
