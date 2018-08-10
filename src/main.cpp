@@ -8,7 +8,6 @@
 #include "config.h"
 #include "engine.h"
 #include "globals.h"
-#include "helper.h"
 #include "offsets.h"
 #include "process.h"
 
@@ -74,8 +73,8 @@ int main()
     ReadConfig("config.ini");
 
     LOG("Done.\n");
-    FindOffsets(proc);
-    PrintOffsets(proc);
+    Signatures::Find(proc);
+    Signatures::Print(proc);
 
     auto& eng = Engine::GetInstance();
     eng.SetProcessManager(&proc);

@@ -1,6 +1,13 @@
 #pragma once
 
+#include "process.h"
 #include <cstdint>
+
+class Signatures {
+    public:
+        static bool Find(Process &mem);
+        static void Print(Process &mem);
+};
 
 namespace Offset {
     namespace Client {

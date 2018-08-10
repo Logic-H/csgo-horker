@@ -1,14 +1,9 @@
-#include "helper.h"
+#include "offsets.h"
 
 #include "globals.h"
-#include "offsets.h"
 #include "sdk/cbaseentity.h"
 #include "sdk/centitylist.h"
 #include <cstdio>
-
-#ifdef OFFSET
-#undef OFFSET
-#endif
 
 #define OFFSET(section, name) uintptr_t Offset::section::name = 0;
 
@@ -42,7 +37,7 @@ namespace Sig {
 };
 
 // TODO: Error handling
-bool FindOffsets(Process &mem)
+bool Signatures::Find(Process &mem)
 {
     uintptr_t localPlayerLea = FindInClient(mem, LocalPlayer);
     uintptr_t localPlayer = mem.GetCallAddress(localPlayerLea);
@@ -70,7 +65,7 @@ bool FindOffsets(Process &mem)
     return true;
 }
 
-void PrintOffsets(Process &mem)
+void Signatures::Print(Process &mem)
 {
     const uintptr_t sClient = mem.GetModuleStart(CLIENT_SO);
     const uintptr_t sEngine = mem.GetModuleStart(ENGINE_SO);

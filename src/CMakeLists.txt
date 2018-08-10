@@ -1,14 +1,14 @@
 add_executable(horker
-    main.cpp
-    config.cpp
-    process.cpp
-    helper.cpp
-    engine.cpp
     features/faim.cpp
     features/fbase.cpp
     features/fglow.cpp
     features/fvisual.cpp
     sdk/centitylist.cpp
+    config.cpp
+    engine.cpp
+    main.cpp
+    offsets.cpp
+    process.cpp
 )
 
 target_link_libraries(horker
