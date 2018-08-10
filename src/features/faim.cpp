@@ -26,6 +26,13 @@ void FAim::Run()
             WaitMs(20);
             continue;
         }
+
+        // AIMBOT START
+
+        
+
+        // AIMBOT END
+
         if (Config::AimBot::Trigger) {
             int myTeam;
             if (!m_mem.Read(localPlayer + Netvar::CBaseEntity::m_iTeamNum, &myTeam)) {
