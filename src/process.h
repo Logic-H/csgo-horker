@@ -19,7 +19,7 @@ class Process {
         bool HasModule(const std::string &moduleName);
 
         template <class T>
-        inline bool Read(void* addr, T* out, size_t len = sizeof(T)) {
+        inline bool Read(void* addr, T* out = NULL, size_t len = sizeof(T)) {
             struct iovec local = {out, len};
             struct iovec remote = {addr, len};
             return (process_vm_readv(m_pid, &local, 1, &remote, 1, 0) ==
@@ -27,12 +27,9 @@ class Process {
         }
 
         template <class T>
-        inline bool Read(uintptr_t addr, T* out, size_t len = sizeof(T))
+        inline bool Read(uintptr_t addr, T* out = NULL, size_t len = sizeof(T))
         {
-            struct iovec local = {out, len};
-            struct iovec remote = {reinterpret_cast<void*>(addr), len};
-            return (process_vm_readv(m_pid, &local, 1, &remote, 1, 0) ==
-                    static_cast<ssize_t>(len));
+            return this->Read(reinterpret_cast<void*>(addr), out, len);
         }
 
         template <class T>

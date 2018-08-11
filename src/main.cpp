@@ -84,11 +84,8 @@ int main()
     FGlow fglow(proc);
     FVisual fvisual(proc);
 
-    const uintptr_t aIsConnected = Offset::Engine::IsConnected;
-    bool isConnected = false;
-
     while (!shouldQuit) {
-        if (!proc.IsValid() || !proc.Read(aIsConnected, &isConnected)) {
+        if (!proc.IsValid()) {
             shouldQuit = true;
             LOG("Lost connection to process... Exiting.\n");
             break;
@@ -99,13 +96,12 @@ int main()
         // ### END MENU HACKS ###
         
         // ### BEGIN IN-GAME HACKS ###
-        if (isConnected) {
+        if (eng.IsConnected()) {
             faim.Start();
             fglow.Start();
             fvisual.Start();
 
-            while (isConnected && !shouldQuit) {
-                proc.Read(aIsConnected, &isConnected);
+            while (eng.IsConnected() && !shouldQuit) {
                 eng.Update();
                 std::this_thread::sleep_for(std::chrono::milliseconds(50));
             }

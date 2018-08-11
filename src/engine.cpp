@@ -74,14 +74,23 @@ void Engine::UpdateEntityList()
     CEntInfo info;
     m_proc->Read(Offset::Client::EntityList, &info);
     if (info.m_pPrev != NULL) {
-        std::cout << "Skipped elements!\n";
+        return;
     }
-    while (info.m_pNext != NULL) {
+    while (info.m_pNext != NULL && IsConnected()) {
         CBaseEntity ent;
-        m_proc->Read(info.m_pEntity, &ent);
+        if (!m_proc->Read(info.m_pEntity, &ent)) {
+            break;
+        }
         m_entitylist.AddEntInfo(ent.index, info);
-        m_proc->Read(info.m_pNext, &info);
+        if (!m_proc->Read(info.m_pNext, &info)) {
+            break;
+        }
     }
+}
+
+bool Engine::IsConnected()
+{
+    return (m_proc->Read(Offset::Engine::IsConnected, &m_bIsConnected) && m_bIsConnected);
 }
 
 void Engine::Update(bool force)
@@ -94,7 +103,6 @@ void Engine::Update(bool force)
     if (force || m_updateTick >= 20) {
         m_updateTick = 0;
         UpdateEntityList();
-        m_proc->Read(Offset::Client::LocalPlayer, &m_localplayer);
     }
 }
 

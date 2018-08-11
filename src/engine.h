@@ -14,6 +14,7 @@ class Engine final {
         static Engine &GetInstance();
         void Update(bool force = false);
         void SetProcessManager(Process *proc);
+        bool IsConnected();
 
         // User Input
         bool IsKeyDown(int keyCode);
@@ -39,7 +40,7 @@ class Engine final {
         CBaseEntityList m_entitylist;
         size_t m_updateTick = 0;
 
-        CGlowObjectManager m_glowmanager;
-        uintptr_t m_localplayer;
+        bool m_bIsConnected = false;
+
         std::mutex m_entitymutex;
 };

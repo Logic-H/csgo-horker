@@ -26,6 +26,7 @@ OFFSET(Client, GlowObjectManager);
 OFFSET(Client, LocalPlayer);
 OFFSET(Client, PlayerResources);
 OFFSET(Engine, IsConnected);
+OFFSET(Engine, ClientState);
 
 namespace Sig {
     SIGNATURE(LocalPlayer, "48 89 E5 74 0E 48 8D 05", 0x7);
@@ -34,6 +35,7 @@ namespace Sig {
     SIGNATURE(ForceAttack, "F7 ?? 83 ?? ?? 45 ?? ?? 74", 0xD);
     SIGNATURE(IsConnected, "48 8B 05 ?? ?? ?? ?? C6 ?? ?? ?? ?? ?? 00 48 8B 10", 0x8);
     SIGNATURE(EntityList, "55 48 89 E5 48 83 EC 10 8B 47 34 48 8D 75 F0 89 45 F0 48 8B 05 ?? ?? ?? ?? 48 8B 38", 0x12);
+    SIGNATURE(ClientState, "48 8B 05 ?? ?? ?? ?? 55 48 8D 3D ?? ?? ?? ?? 48 89 E5 FF 50 28", 0x0);
 };
 
 // TODO: Error handling
@@ -62,6 +64,10 @@ bool Signatures::Find(Process &mem)
     uintptr_t connectedMov = FindInEngine(mem, IsConnected);
     Offset::Engine::IsConnected = mem.GetAbsoluteAddress(connectedMov, 1, 6);
 
+    uintptr_t splitScreenMgrLea = FindInEngine(mem, ClientState);
+    uintptr_t clientState = mem.GetAbsoluteAddress(splitScreenMgrLea, 3, 7);
+    mem.Read(clientState + 0x8, &clientState);
+    Offset::Engine::ClientState = clientState + 0x8;
     return true;
 }
 
@@ -76,6 +82,7 @@ void Signatures::Print(Process &mem)
     PrintOffset(Client, LocalPlayer, sClient);
     PrintOffset(Client, PlayerResources, sClient);
     PrintOffset(Engine, IsConnected, sEngine);
+    PrintOffset(Engine, ClientState, sEngine);
     printf("\n#########################\n\n");
 }
 

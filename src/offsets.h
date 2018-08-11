@@ -19,6 +19,7 @@ namespace Offset {
     };
     namespace Engine {
         extern uintptr_t IsConnected;
+        extern uintptr_t ClientState;
     };
 
     namespace Static {
