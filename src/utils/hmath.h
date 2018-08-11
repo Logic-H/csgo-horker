@@ -66,7 +66,7 @@ inline float HMath::GetFov(const Vector& eyePos, const Vector& localHeadPos, con
 inline Vector HMath::VectorAngles(const Vector& dir)
 {
     Vector angles = dir;
-    float hyp = std::sqrt((dir.x * dir.x) + (dir.y * dir.y));
+    double hyp = std::sqrt((dir.x * dir.x) + (dir.y * dir.y));
     angles.x = (float) std::atan(dir.z / hyp) * HMath::RADPI;
     angles.y = (float) std::atan(dir.y / dir.x) * HMath::RADPI;
     if (dir.x >= 0.0) {

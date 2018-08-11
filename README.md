@@ -1,12 +1,10 @@
 # Horker
 A simple CSGO Linux external hack.
 
-### Preamble
-I created this as a stop-gap while we work on updating jwaim.  Currently the only supported feature is glow, but I plan on adding a few more nice things once I get the code base in better shape.
-
 ### Current Features
+* AimBot (experimental)
 * Glow
-* Noflash
+* NoFlash
 * Trigger
 
 ### Compiling

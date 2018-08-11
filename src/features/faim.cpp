@@ -35,6 +35,20 @@ bool FAim::GetBonePosition(uintptr_t ePtr, int bone, Vector* out)
 
 void FAim::Aim(uintptr_t localPlayer, int myTeam)
 {
+    auto tickClock = std::chrono::high_resolution_clock::now();
+    auto tickMs = std::chrono::duration_cast<std::chrono::milliseconds>(tickClock - m_nLastTick);
+   
+    // Mouse speed is highly affected by user sensitivity
+    // This lowers it so it requires less ticks per call
+    // i.e. faster aiming
+    if (Config::AimBot::UseMouseEvents && tickMs.count() < 1000/256) {
+        return;
+    } else if (!Config::AimBot::UseMouseEvents && tickMs.count() < 1000/64) {
+        return;
+    }
+
+    m_nLastTick = tickClock;
+
     auto& eng = Engine::GetInstance();
     Vector vecEyes;
     Vector vecEyesOffset;
@@ -43,7 +57,7 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
     int localIndex;
     if (m_mem.Read(localPlayer + Netvar::CBaseEntity::m_vecOrigin, &vecEyes) &&
         m_mem.Read(localPlayer + Netvar::CBaseEntity::m_vecViewOffset, &vecEyesOffset) &&
-        m_mem.Read(localPlayer + Netvar::CBaseEntity::m_angRotation, &viewAngle) &&
+        m_mem.Read(Offset::Engine::ClientState + Offset::Static::ViewAngles , &viewAngle) &&
         m_mem.Read(localPlayer + Netvar::CBasePlayer::Local::m_aimPunchAngle, &punchAngle) &&
         m_mem.Read(localPlayer + Netvar::CBaseEntity::index, &localIndex)) {
         
@@ -97,23 +111,40 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
             Vector clampedDir = HMath::ClampAngle(anglesDir);
             Vector diffAngles = HMath::ClampAngle(viewAngle - clampedDir + punchAngle);
             // AimBot rotation speed
-            float outX = HMath::Clampf(diffAngles.x,
-                    -Config::AimBot::AimSpeed, 
-                    Config::AimBot::AimSpeed,
-                    Config::AimBot::AimCorrection);
-            float outY = HMath::Clampf(diffAngles.y, 
-                    -Config::AimBot::AimSpeed,
-                    Config::AimBot::AimSpeed,
-                    Config::AimBot::AimCorrection);
-            XTestFakeRelativeMotionEvent(internDpy, (int) outY, -(int) outX, 0);
+
+            if (Config::AimBot::UseMouseEvents) {
+                float outX = HMath::Clampf(diffAngles.x,
+                        -Config::AimBot::AimSpeed, 
+                        Config::AimBot::AimSpeed,
+                        Config::AimBot::AimCorrection);
+                float outY = HMath::Clampf(diffAngles.y, 
+                        -Config::AimBot::AimSpeed,
+                        Config::AimBot::AimSpeed,
+                        Config::AimBot::AimCorrection);
+                XTestFakeRelativeMotionEvent(internDpy, (int) outY, -(int) outX, 0);
+            } else {
+                // Don't use correction in memory mode
+                float adjAimSpeed = Config::AimBot::AimSpeed/6.0f;
+                float outX = HMath::Clampf(diffAngles.x,
+                        -adjAimSpeed, 
+                        adjAimSpeed,
+                        1.f);
+                float outY = HMath::Clampf(diffAngles.y, 
+                        -adjAimSpeed,
+                        adjAimSpeed,
+                        1.f);
+                viewAngle.x -= outX;
+                viewAngle.y -= outY;
+                m_mem.Write(Offset::Engine::ClientState + Offset::Static::ViewAngles, viewAngle);
+            }
             XFlush(internDpy);
         }
     }
-
 }
 
 void FAim::Run()
 {
+    m_nLastTick = std::chrono::high_resolution_clock::now();
     internDpy = XOpenDisplay(NULL);
     
     if (internDpy == nullptr) {

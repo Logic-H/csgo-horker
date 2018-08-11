@@ -16,6 +16,7 @@ namespace Config {
         extern int         TriggerDelay;
         extern bool        UseTriggerKey;
         extern std::string TriggerKey;
+        extern bool        UseMouseEvents;
     };
 
     namespace Glow {

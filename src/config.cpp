@@ -35,6 +35,7 @@ bool  Config::AimBot::Trigger = true;
 int   Config::AimBot::TriggerDelay = 50;
 bool  Config::AimBot::UseTriggerKey = true;
 std::string Config::AimBot::TriggerKey = "F";
+bool  Config::AimBot::UseMouseEvents = false;
 
 #define WriteSection(key) \
     conf << "[" #key "]" << "\n";
@@ -50,7 +51,7 @@ void UpdateConfig()
         WriteSection(AimBot);
         WriteComment("Enable Aim Assist: 1/0");
         WritePair(AimBot, AimAssist);
-        WriteComment("Aim correction (Higher values reduce jitter w/ high mouse sensitivity)");
+        WriteComment("Aim correction (Higher values reduce jitter w/ UseMouseEvents)");
         WritePair(AimBot, AimCorrection);
         WriteComment("Aim field of view (float) - Adjustments for TargetMode = 1");
         WritePair(AimBot, AimFieldOfView);
@@ -76,6 +77,8 @@ void UpdateConfig()
         WritePair(AimBot, UseTriggerKey);
         WriteComment("Keyboard key to use for Aim/Trigger (Default is F)");
         WritePair(AimBot, TriggerKey);
+        WriteComment("Use mouse events instead of adjusting in-game camera (less accurate)");
+        WritePair(AimBot, UseMouseEvents);
         WriteSectionEnd();
 
         WriteSection(Glow);
@@ -128,6 +131,7 @@ bool ReadConfig(const std::string &configFile)
     RCINT(AimBot, TriggerDelay);
     RCSTR (AimBot, TriggerKey);
     RCBOOL(AimBot, UseTriggerKey);
+    RCBOOL(AimBot, UseMouseEvents);
 
     RCBOOL(Glow, Enabled);
     RCBOOL(Glow, LegitGlow);

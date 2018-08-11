@@ -23,6 +23,7 @@ namespace Offset {
     };
 
     namespace Static {
+        constexpr size_t ViewAngles = 0x8E20;
         constexpr size_t BoneMatrix = 0x2c70;
         constexpr size_t BoneDistance = 0x30; // Read(BoneMatrix) + BoneDistance
     };
