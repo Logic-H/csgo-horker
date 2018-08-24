@@ -72,8 +72,9 @@ void UpdateConfig()
         WriteComment("-- Pelvis = 2");
 
         WritePair(AimBot, TargetBone);
-        WriteComment("Enable auto-trigger: 1/0");
+        WriteComment("Enable recoil control: 1/0");
         WritePair(AimBot, RecoilControl);
+        WriteComment("Enable auto-trigger: 1/0");
         WritePair(AimBot, Trigger);
         WriteComment("Delay between shots in milliseconds");
         WritePair(AimBot, TriggerDelay);
