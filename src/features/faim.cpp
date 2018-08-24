@@ -135,6 +135,10 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
             Vector anglesDir = HMath::VectorAngles(vecEyes);
             Vector clampedDir = HMath::ClampAngle(anglesDir);
             Vector diffAngles = HMath::ClampAngle(viewAngle - clampedDir);
+            if (Config::AimBot::RecoilControl) {
+                punchAngle *= 2.f;
+                diffAngles += punchAngle;
+            }
             // AimBot rotation speed
 
             if (Config::AimBot::UseMouseEvents) {
@@ -160,7 +164,6 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
                                            1.f);
                 viewAngle.x -= outX;
                 viewAngle.y -= outY;
-                this->Recoil(localPlayer, viewAngle);
                 m_mem.Write(Offset::Engine::ClientState + Offset::Static::ViewAngles, viewAngle);
             }
             XFlush(internDpy);
