@@ -135,17 +135,19 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
             Vector anglesDir = HMath::VectorAngles(vecEyes);
             Vector clampedDir = HMath::ClampAngle(anglesDir);
             Vector diffAngles = HMath::ClampAngle(viewAngle - clampedDir);
-            if (Config::AimBot::RecoilControl) {
-                punchAngle *= 2.f;
-                diffAngles += punchAngle;
-            }
             // AimBot rotation speed
 
+            int shotsFired = 0;
+            m_mem.Read(localPlayer + 0xabb0, &shotsFired);
+
             if (Config::AimBot::UseMouseEvents) {
-                float outX = HMath::Clampf(diffAngles.x,
-                                           -Config::AimBot::AimSpeed,
-                                           Config::AimBot::AimSpeed,
-                                           Config::AimBot::AimCorrection);
+                float outX = 0.f;
+                if (shotsFired < 2) {
+                    outX = HMath::Clampf(diffAngles.x,
+                                               -Config::AimBot::AimSpeed,
+                                               Config::AimBot::AimSpeed,
+                                               Config::AimBot::AimCorrection);
+                }
                 float outY = HMath::Clampf(diffAngles.y,
                                            -Config::AimBot::AimSpeed,
                                            Config::AimBot::AimSpeed,
@@ -162,7 +164,10 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
                                            -adjAimSpeed,
                                            adjAimSpeed,
                                            1.f);
-                viewAngle.x -= outX;
+
+                if (shotsFired < 2) {
+                    viewAngle.x -= outX;
+                }
                 viewAngle.y -= outY;
                 m_mem.Write(Offset::Engine::ClientState + Offset::Static::ViewAngles, viewAngle);
             }
@@ -221,12 +226,11 @@ void FAim::Run() {
         // AIMBOT START
         if (Config::AimBot::AimAssist) {
             this->Aim(localPlayer, myTeam);
-        } else {
-            Vector viewAngle;
-            if (m_mem.Read(Offset::Engine::ClientState + Offset::Static::ViewAngles, &viewAngle)) {
-                this->Recoil(localPlayer, viewAngle);
-                m_mem.Write(Offset::Engine::ClientState + Offset::Static::ViewAngles, viewAngle);
-            }
+        }
+        Vector viewAngle;
+        if (m_mem.Read(Offset::Engine::ClientState + Offset::Static::ViewAngles, &viewAngle)) {
+            this->Recoil(localPlayer, viewAngle);
+            m_mem.Write(Offset::Engine::ClientState + Offset::Static::ViewAngles, viewAngle);
         }
 
         if (Config::AimBot::Trigger) {
