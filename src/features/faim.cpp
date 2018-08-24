@@ -36,18 +36,13 @@ bool FAim::GetBonePosition(uintptr_t ePtr, int bone, Vector *out)
 
 void FAim::Recoil(uintptr_t localPlayer, Vector& viewAngle)
 {
+    if (!Config::AimBot::AimAssist) return;
     if (!Config::AimBot::RecoilControl) return;
-    int shotsFired = 0;
-    if (m_mem.Read(localPlayer + 0xabb0, &shotsFired)) {
-        if (shotsFired > 0) {
-            Vector punchAngle;
-            if (m_mem.Read(localPlayer + Netvar::CBasePlayer::Local::m_aimPunchAngle, &punchAngle)) {
-                viewAngle -= punchAngle;
-                viewAngle -= punchAngle;
-            }
-        }
+    Vector punchAngle;
+    if (m_mem.Read(localPlayer + Netvar::CBasePlayer::Local::m_aimPunchAngle, &punchAngle)) {
+        viewAngle -= punchAngle;
+        viewAngle -= punchAngle;
     }
-
 }
 
 void FAim::Aim(uintptr_t localPlayer, int myTeam)
