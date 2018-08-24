@@ -37,6 +37,7 @@ int   Config::AimBot::TriggerDelay = 50;
 bool  Config::AimBot::UseTriggerKey = true;
 std::string Config::AimBot::TriggerKey = "F";
 bool  Config::AimBot::UseMouseEvents = false;
+bool  Config::AimBot::AttackTeammate = false;
 
 #define WriteSection(key) \
     conf << "[" #key "]" << "\n";
@@ -60,7 +61,8 @@ void UpdateConfig()
         WritePair(AimBot, AimSpeed);
         WriteComment("TargetMode Valid List:");
         WriteComment("-- Nearest: 0");
-        WriteComment("-- FOV: 1");
+        WriteComment("-- Distance based FOV: 1");
+        WriteComment("-- Angle based FOV: 2");
         WritePair(AimBot, TargetMode);
 
         WriteComment("TargetBone Valid List:");
@@ -81,6 +83,8 @@ void UpdateConfig()
         WritePair(AimBot, TriggerKey);
         WriteComment("Use mouse events instead of adjusting in-game camera (less accurate)");
         WritePair(AimBot, UseMouseEvents);
+        WriteComment("Also attack teammate");
+        WritePair(AimBot, AttackTeammate);
         WriteSectionEnd();
 
         WriteSection(Glow);
@@ -135,6 +139,7 @@ bool ReadConfig(const std::string &configFile)
     RCBOOL(AimBot, RecoilControl);
     RCBOOL(AimBot, UseTriggerKey);
     RCBOOL(AimBot, UseMouseEvents);
+    RCBOOL(AimBot, AttackTeammate);
 
     RCBOOL(Glow, Enabled);
     RCBOOL(Glow, LegitGlow);
