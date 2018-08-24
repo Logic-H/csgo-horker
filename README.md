@@ -6,6 +6,13 @@ A simple CSGO Linux external hack.
 * Glow
 * NoFlash
 * Trigger
+* Recoil Control
+
+### Mouse button support
+There is also mouse button support as of commit cdc56a4.  The only known bug at this time is it doesn't register until after the first shot, which is mostly because I was too lazy to do it via Alt1 for now.
+
+To enable this, you will need to set "TriggerKey" to "Mouse1", "Mouse2", or "Mouse3" respectively, without the quotes.
+
 
 ### Compiling
 ##### Clone the repository
