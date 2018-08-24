@@ -4,6 +4,7 @@ add_executable(horker
     features/fglow.cpp
     features/fvisual.cpp
     sdk/centitylist.cpp
+    helper.cpp
     config.cpp
     engine.cpp
     main.cpp

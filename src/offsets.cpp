@@ -66,8 +66,10 @@ bool Signatures::Find(Process &mem)
 
     uintptr_t splitScreenMgrLea = FindInEngine(mem, ClientState);
     uintptr_t clientState = mem.GetAbsoluteAddress(splitScreenMgrLea, 3, 7);
+    printf("%#lx\n", clientState - mem.GetModuleStart(ENGINE_SO) + 0x8);
     mem.Read(clientState + 0x8, &clientState);
     Offset::Engine::ClientState = clientState + 0x8;
+    printf("%#lx\n", Offset::Engine::ClientState - 0x8);
     return true;
 }
 

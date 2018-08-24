@@ -15,6 +15,7 @@ namespace Config {
         extern bool        Trigger;
         extern int         TriggerDelay;
         extern bool        UseTriggerKey;
+        extern bool        RecoilControl;
         extern std::string TriggerKey;
         extern bool        UseMouseEvents;
     };

@@ -8,6 +8,7 @@
 #include "config.h"
 #include "engine.h"
 #include "globals.h"
+#include "helper.h"
 #include "offsets.h"
 #include "process.h"
 
@@ -42,6 +43,11 @@ int main()
 {
     if (getuid() != 0) {
         LOG("This program must be ran as root.\n");
+        return 0;
+    }
+
+    if (!Helper::Init()) {
+        LOG("Failed to initialize input handling.\n");
         return 0;
     }
     
@@ -113,5 +119,6 @@ int main()
         // ### END IN-GAME HACKS ###
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+    Helper::Finalize();
     return 0;
 }

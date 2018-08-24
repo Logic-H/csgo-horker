@@ -20,6 +20,7 @@ class FAim : public FBase {
         void Run();
     private:
         void Aim(uintptr_t localPlayer, int myTeam);
+        void Recoil(uintptr_t localPlayer, Vector& viewAngle);
         void DoTrigger();
         bool GetBonePosition(uintptr_t ePtr, int bone, Vector *out);
         size_t m_nTick = 0;

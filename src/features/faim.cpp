@@ -2,6 +2,7 @@
 
 #include "../config.h"
 #include "../engine.h"
+#include "../helper.h"
 #include "../offsets.h"
 #include "../sdk/mathlib.h"
 #include "../sdk/types.h"
@@ -31,6 +32,22 @@ bool FAim::GetBonePosition(uintptr_t ePtr, int bone, Vector* out)
     out->y = mat[1][3];
     out->z = mat[2][3];
     return true;
+}
+
+void FAim::Recoil(uintptr_t localPlayer, Vector& viewAngle)
+{
+    if (!Config::AimBot::RecoilControl) return;
+    int shotsFired = 0;
+    if (m_mem.Read(localPlayer + 0xabb0, &shotsFired)) {
+        if (shotsFired > 0) {
+            Vector punchAngle;
+            if (m_mem.Read(localPlayer + Netvar::CBasePlayer::Local::m_aimPunchAngle, &punchAngle)) {
+                viewAngle -= punchAngle;
+                viewAngle -= punchAngle;
+            }
+        }
+    }
+
 }
 
 void FAim::Aim(uintptr_t localPlayer, int myTeam)
@@ -109,7 +126,7 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
             vecEyes.NormalizeInPlace();
             Vector anglesDir = HMath::VectorAngles(vecEyes);
             Vector clampedDir = HMath::ClampAngle(anglesDir);
-            Vector diffAngles = HMath::ClampAngle(viewAngle - clampedDir + punchAngle);
+            Vector diffAngles = HMath::ClampAngle(viewAngle - clampedDir);
             // AimBot rotation speed
 
             if (Config::AimBot::UseMouseEvents) {
@@ -135,6 +152,7 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
                         1.f);
                 viewAngle.x -= outX;
                 viewAngle.y -= outY;
+                this->Recoil(localPlayer, viewAngle);
                 m_mem.Write(Offset::Engine::ClientState + Offset::Static::ViewAngles, viewAngle);
             }
             XFlush(internDpy);
@@ -151,8 +169,18 @@ void FAim::Run()
         Log("[FAim] Failed to open display");
         return;
     }
-    const int triggerKey = Engine::StringToKeycode(Config::AimBot::TriggerKey);
-    
+
+    bool useMouseButton = false;
+    if (Config::AimBot::TriggerKey.compare(0, 5, "Mouse") == 0) {
+        useMouseButton = true;
+    }
+
+    const int triggerKey = useMouseButton ? 
+        Helper::StringToMouseMask(Config::AimBot::TriggerKey) :
+        Helper::StringToKeycode(Config::AimBot::TriggerKey);
+    if (useMouseButton) {
+        std::cout << "Using mouse mask: " << triggerKey << '\n';
+    }
     Log("[FAim] Started");
     
     auto& eng = Engine::GetInstance();
@@ -170,14 +198,27 @@ void FAim::Run()
             continue;
         }
 
-        if (!eng.IsKeyDown(triggerKey) && Config::AimBot::UseTriggerKey) {
-            WaitMs(20);
-            continue;
+        if (Config::AimBot::UseTriggerKey) {
+            if (useMouseButton) {
+                if (!Helper::IsMouseDown(triggerKey)) {
+                    WaitMs(20);
+                    continue;
+                }
+            } else if (!Helper::IsKeyDown(triggerKey)) {
+                WaitMs(20);
+                continue;
+            }
         }
 
         // AIMBOT START
         if (Config::AimBot::AimAssist) {
             this->Aim(localPlayer, myTeam);
+        } else {
+            Vector viewAngle;
+            if (m_mem.Read(Offset::Engine::ClientState + Offset::Static::ViewAngles, &viewAngle)) {
+                this->Recoil(localPlayer, viewAngle);
+                m_mem.Write(Offset::Engine::ClientState + Offset::Static::ViewAngles, viewAngle);
+            }
         }
 
         if (Config::AimBot::Trigger) {

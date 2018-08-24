@@ -7,40 +7,13 @@
 #include <X11/keysym.h>
 #include <X11/keysymdef.h>
 
-static Display *internDpy = nullptr;
-
 Engine &Engine::GetInstance()
 {
-    if (internDpy == nullptr) {
-        internDpy = XOpenDisplay(NULL);
-    }
-    if (internDpy == nullptr) {
-        throw std::runtime_error("Failed to open display");
-    }
     static Engine instance;
     return instance;
 }
 
 Engine::~Engine() {
-    if (internDpy) {
-        XCloseDisplay(internDpy);
-    }
-}
-
-int Engine::StringToKeycode(std::string keyString)
-{
-    KeySym ks = XStringToKeysym(keyString.data());
-    return XKeysymToKeycode(internDpy, ks);
-}
-
-bool Engine::IsKeyDown(int keyCode)
-{
-    char keys[32];
-    XQueryKeymap(internDpy, keys);
-    if (keys[keyCode/8] & (1<<(keyCode%8))) {
-        return true;
-    }
-    return false;
 }
 
 void Engine::SetProcessManager(Process *proc)

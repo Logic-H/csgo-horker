@@ -16,10 +16,6 @@ class Engine final {
         void SetProcessManager(Process *proc);
         bool IsConnected();
 
-        // User Input
-        bool IsKeyDown(int keyCode);
-        static int StringToKeycode(std::string keyString);
-
         // Entity List
         const CBaseEntityList &GetEntityList() const;
         bool GetEntityById(int id, CBaseEntity* ent);

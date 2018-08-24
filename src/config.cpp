@@ -32,6 +32,7 @@ float Config::AimBot::AimSpeed = 5.0f;
 int   Config::AimBot::TargetMode = 1;
 int   Config::AimBot::TargetBone = 8;
 bool  Config::AimBot::Trigger = true;
+bool  Config::AimBot::RecoilControl = true;
 int   Config::AimBot::TriggerDelay = 50;
 bool  Config::AimBot::UseTriggerKey = true;
 std::string Config::AimBot::TriggerKey = "F";
@@ -70,6 +71,7 @@ void UpdateConfig()
 
         WritePair(AimBot, TargetBone);
         WriteComment("Enable auto-trigger: 1/0");
+        WritePair(AimBot, RecoilControl);
         WritePair(AimBot, Trigger);
         WriteComment("Delay between shots in milliseconds");
         WritePair(AimBot, TriggerDelay);
@@ -130,6 +132,7 @@ bool ReadConfig(const std::string &configFile)
     RCBOOL(AimBot, Trigger);
     RCINT(AimBot, TriggerDelay);
     RCSTR (AimBot, TriggerKey);
+    RCBOOL(AimBot, RecoilControl);
     RCBOOL(AimBot, UseTriggerKey);
     RCBOOL(AimBot, UseMouseEvents);
 
