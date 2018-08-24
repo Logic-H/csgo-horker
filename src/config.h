@@ -17,6 +17,7 @@ namespace Config {
         extern bool        UseTriggerKey;
         extern std::string TriggerKey;
         extern bool        UseMouseEvents;
+        extern bool        AttackTeammate;
     };
 
     namespace Glow {

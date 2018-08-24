@@ -15,7 +15,7 @@
 
 static Display *internDpy = nullptr;
 
-bool FAim::GetBonePosition(uintptr_t ePtr, int bone, Vector* out)
+bool FAim::GetBonePosition(uintptr_t ePtr, int bone, Vector *out)
 {
     matrix3x4_t mat;
     uintptr_t pBoneMatrix;
@@ -37,19 +37,19 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
 {
     auto tickClock = std::chrono::high_resolution_clock::now();
     auto tickMs = std::chrono::duration_cast<std::chrono::milliseconds>(tickClock - m_nLastTick);
-   
+
     // Mouse speed is highly affected by user sensitivity
     // This lowers it so it requires less ticks per call
     // i.e. faster aiming
-    if (Config::AimBot::UseMouseEvents && tickMs.count() < 1000/256) {
+    if (Config::AimBot::UseMouseEvents && tickMs.count() < 1000 / 256) {
         return;
-    } else if (!Config::AimBot::UseMouseEvents && tickMs.count() < 1000/64) {
+    } else if (!Config::AimBot::UseMouseEvents && tickMs.count() < 1000 / 64) {
         return;
     }
 
     m_nLastTick = tickClock;
 
-    auto& eng = Engine::GetInstance();
+    auto &eng = Engine::GetInstance();
     Vector vecEyes;
     Vector vecEyesOffset;
     Vector viewAngle;
@@ -57,15 +57,15 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
     int localIndex;
     if (m_mem.Read(localPlayer + Netvar::CBaseEntity::m_vecOrigin, &vecEyes) &&
         m_mem.Read(localPlayer + Netvar::CBaseEntity::m_vecViewOffset, &vecEyesOffset) &&
-        m_mem.Read(Offset::Engine::ClientState + Offset::Static::ViewAngles , &viewAngle) &&
+        m_mem.Read(Offset::Engine::ClientState + Offset::Static::ViewAngles, &viewAngle) &&
         m_mem.Read(localPlayer + Netvar::CBasePlayer::Local::m_aimPunchAngle, &punchAngle) &&
         m_mem.Read(localPlayer + Netvar::CBaseEntity::index, &localIndex)) {
-        
+
         vecEyes += vecEyesOffset;
         float bestVal = FLT_MAX;
         Vector bestTarget(0.f, 0.f, 0.f);
         for (size_t i = 1; i < 64; ++i) {
-            uintptr_t  pEnt;
+            uintptr_t pEnt;
             CBaseEntity ent;
             if (!eng.GetEntityById(i, &ent) || !eng.GetEntityPtrById(i, &pEnt)) {
                 continue;
@@ -76,12 +76,13 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
             if (ent.m_iTeamNum != TEAM_T && ent.m_iTeamNum != TEAM_CT) {
                 continue;
             }
-            if (ent.m_iTeamNum == myTeam)
+            if (ent.m_iTeamNum == myTeam && !Config::AimBot::AttackTeammate)
                 continue;
 
             if (ent.m_iHealth < 1) {
                 continue;
             }
+
             Vector hitbox;
             if (!GetBonePosition(pEnt, Config::AimBot::TargetBone, &hitbox)) {
                 continue;
@@ -101,6 +102,16 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
                     bestVal = fov;
                     bestTarget = hitbox;
                 }
+            } else if (Config::AimBot::TargetMode == 2) {
+                auto target = HMath::CalcAngle(viewAngle, hitbox);
+                float fov = viewAngle.DistTo(target);
+                if (fov > Config::AimBot::AimFieldOfView) {
+                    continue;
+                }
+                if (fov < bestVal) {
+                    bestVal = fov;
+                    bestTarget = hitbox;
+                }
             }
         }
 
@@ -114,25 +125,25 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
 
             if (Config::AimBot::UseMouseEvents) {
                 float outX = HMath::Clampf(diffAngles.x,
-                        -Config::AimBot::AimSpeed, 
-                        Config::AimBot::AimSpeed,
-                        Config::AimBot::AimCorrection);
-                float outY = HMath::Clampf(diffAngles.y, 
-                        -Config::AimBot::AimSpeed,
-                        Config::AimBot::AimSpeed,
-                        Config::AimBot::AimCorrection);
+                                           -Config::AimBot::AimSpeed,
+                                           Config::AimBot::AimSpeed,
+                                           Config::AimBot::AimCorrection);
+                float outY = HMath::Clampf(diffAngles.y,
+                                           -Config::AimBot::AimSpeed,
+                                           Config::AimBot::AimSpeed,
+                                           Config::AimBot::AimCorrection);
                 XTestFakeRelativeMotionEvent(internDpy, (int) outY, -(int) outX, 0);
             } else {
                 // Don't use correction in memory mode
-                float adjAimSpeed = Config::AimBot::AimSpeed/6.0f;
+                float adjAimSpeed = Config::AimBot::AimSpeed / 6.0f;
                 float outX = HMath::Clampf(diffAngles.x,
-                        -adjAimSpeed, 
-                        adjAimSpeed,
-                        1.f);
-                float outY = HMath::Clampf(diffAngles.y, 
-                        -adjAimSpeed,
-                        adjAimSpeed,
-                        1.f);
+                                           -adjAimSpeed,
+                                           adjAimSpeed,
+                                           1.f);
+                float outY = HMath::Clampf(diffAngles.y,
+                                           -adjAimSpeed,
+                                           adjAimSpeed,
+                                           1.f);
                 viewAngle.x -= outX;
                 viewAngle.y -= outY;
                 m_mem.Write(Offset::Engine::ClientState + Offset::Static::ViewAngles, viewAngle);
@@ -142,21 +153,20 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
     }
 }
 
-void FAim::Run()
-{
+void FAim::Run() {
     m_nLastTick = std::chrono::high_resolution_clock::now();
     internDpy = XOpenDisplay(NULL);
-    
+
     if (internDpy == nullptr) {
         Log("[FAim] Failed to open display");
         return;
     }
     const int triggerKey = Engine::StringToKeycode(Config::AimBot::TriggerKey);
-    
+
     Log("[FAim] Started");
-    
-    auto& eng = Engine::GetInstance();
-    
+
+    auto &eng = Engine::GetInstance();
+
     while (!ShouldStop()) {
         uintptr_t localPlayer;
         if (!m_mem.Read(Offset::Client::LocalPlayer, &localPlayer)) {
@@ -195,7 +205,7 @@ void FAim::Run()
                     continue;
                 }
                 if (ent.m_iHealth > 0) {
-                    if (ent.m_iTeamNum != myTeam) {
+                    if (ent.m_iTeamNum != myTeam || Config::AimBot::AttackTeammate) {
                         eng.ForceAttack(true);
                         WaitMs(10);
                         eng.ForceAttack(false);
