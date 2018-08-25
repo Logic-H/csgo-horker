@@ -34,9 +34,14 @@ bool FAim::GetBonePosition(uintptr_t ePtr, int bone, Vector *out)
     return true;
 }
 
-void FAim::Recoil(uintptr_t localPlayer)
+void FAim::Recoil(uintptr_t localPlayer, bool forceReset)
 {
     if (!Config::AimBot::RecoilControl) return;
+    if (forceReset) {
+        m_vecOldPunchAngle.x = 0.f;
+        m_vecOldPunchAngle.y = 0.f;
+        return;
+    }
     Vector punchAngle;
     Vector viewAngle;
     int shotsFired = 0;
@@ -214,27 +219,20 @@ void FAim::Run() {
             continue;
         }
 
+        bool triggerOn = true;
         if (Config::AimBot::UseTriggerKey) {
-            if (useMouseButton) {
-                if (!Helper::IsMouseDown(triggerKey)) {
-                    this->Recoil(localPlayer);
-                    WaitMs(20);
-                    continue;
-                }
-            } else if (!Helper::IsKeyDown(triggerKey)) {
-                this->Recoil(localPlayer);
-                WaitMs(20);
-                continue;
-            }
+            triggerOn = useMouseButton ? Helper::IsMouseDown(triggerKey) :
+                Helper::IsKeyDown(triggerKey);
+            this->Recoil(localPlayer, !triggerOn);
         }
 
         // AIMBOT START
-        if (Config::AimBot::AimAssist) {
+        if (Config::AimBot::AimAssist && triggerOn) {
             this->Aim(localPlayer, myTeam);
         }
-        this->Recoil(localPlayer);
+        this->Recoil(localPlayer, !triggerOn);
 
-        if (Config::AimBot::Trigger) {
+        if (Config::AimBot::Trigger && triggerOn) {
 
             int inCrossID;
             if (!m_mem.Read(localPlayer + Netvar::CBasePlayer::m_iCrosshairID, &inCrossID)) {
