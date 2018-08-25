@@ -20,9 +20,10 @@ class FAim : public FBase {
         void Run();
     private:
         void Aim(uintptr_t localPlayer, int myTeam);
-        void Recoil(uintptr_t localPlayer, Vector& viewAngle);
+        void Recoil(uintptr_t localPlayer);
         void DoTrigger();
         bool GetBonePosition(uintptr_t ePtr, int bone, Vector *out);
         size_t m_nTick = 0;
         std::chrono::time_point<std::chrono::high_resolution_clock> m_nLastTick;
+        Vector m_vecOldPunchAngle;
 };
