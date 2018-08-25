@@ -18,11 +18,11 @@ namespace Offset {
         extern uintptr_t PlayerResources;
     };
     namespace Engine {
-        extern uintptr_t IsConnected;
         extern uintptr_t ClientState;
     };
 
     namespace Static {
+        constexpr size_t SignOnState = 0x1a0;
         constexpr size_t ViewAngles = 0x8E20;
         constexpr size_t BoneMatrix = 0x2c70;
         constexpr size_t BoneDistance = 0x30; // Read(BoneMatrix) + BoneDistance

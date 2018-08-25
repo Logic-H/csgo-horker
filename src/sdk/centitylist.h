@@ -13,6 +13,7 @@ class CEntInfo {
 
 class CBaseEntityList {
     public:
+        const std::unordered_map<int, CEntInfo> &Data() const { return m_entinfo; }
         void AddEntInfo(int index, CEntInfo einfo);
         uintptr_t GetEntityPtrById(int index);
         void Reset();

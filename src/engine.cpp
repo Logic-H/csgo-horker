@@ -21,6 +21,11 @@ void Engine::SetProcessManager(Process *proc)
     m_proc = proc;
 }
 
+const CBaseEntityList &Engine::GetEntityList() const
+{
+    return this->m_entitylist;
+}
+
 bool Engine::GetEntityById(int id, CBaseEntity* ent)
 {
     std::lock_guard<std::mutex> guard(m_entitymutex);
@@ -63,7 +68,9 @@ void Engine::UpdateEntityList()
 
 bool Engine::IsConnected()
 {
-    return (m_proc->Read(Offset::Engine::IsConnected, &m_bIsConnected) && m_bIsConnected);
+    int sos = 0;
+    m_proc->Read(Offset::Engine::ClientState + Offset::Static::SignOnState, &sos);
+    return (sos == 6);
 }
 
 void Engine::Update(bool force)

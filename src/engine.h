@@ -35,8 +35,5 @@ class Engine final {
         Process *m_proc = nullptr;
         CBaseEntityList m_entitylist;
         size_t m_updateTick = 0;
-
-        bool m_bIsConnected = false;
-
         std::mutex m_entitymutex;
 };

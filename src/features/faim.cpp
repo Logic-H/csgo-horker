@@ -82,104 +82,112 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
     Vector viewAngle;
     Vector punchAngle;
     int localIndex;
-    if (m_mem.Read(localPlayer + Netvar::CBaseEntity::m_vecOrigin, &vecEyes) &&
-        m_mem.Read(localPlayer + Netvar::CBaseEntity::m_vecViewOffset, &vecEyesOffset) &&
-        m_mem.Read(Offset::Engine::ClientState + Offset::Static::ViewAngles, &viewAngle) &&
-        m_mem.Read(localPlayer + Netvar::CBasePlayer::Local::m_aimPunchAngle, &punchAngle) &&
-        m_mem.Read(localPlayer + Netvar::CBaseEntity::index, &localIndex)) {
+    
+    if (!m_mem.Read(localPlayer + Netvar::CBaseEntity::m_vecOrigin, &vecEyes)) {
+        LogWait("[FAim/Aim] Failed to read CBaseEntity::m_vecOrigin");
+        return;
+    }
+    
+    if (!m_mem.Read(localPlayer + Netvar::CBaseEntity::m_vecViewOffset, &vecEyesOffset)) {
+        LogWait("[FAim/Aim] Failed to read CBaseEntity::m_vecViewOffset");
+        return;
+    }
+    
+    if (!m_mem.Read(Offset::Engine::ClientState + Offset::Static::ViewAngles, &viewAngle)) {
+        LogWait("[FAim/Aim] Failed to read ClientState::ViewAngles");
+        return;
+    }
 
-        vecEyes += vecEyesOffset;
-        float bestVal = FLT_MAX;
-        Vector bestTarget(0.f, 0.f, 0.f);
-        for (size_t i = 1; i < 64; ++i) {
-            uintptr_t pEnt;
-            CBaseEntity ent;
-            if (!eng.GetEntityById(i, &ent) || !eng.GetEntityPtrById(i, &pEnt)) {
-                continue;
-            }
-            if (ent.index == localIndex) {
-                continue;
-            }
-            if (ent.m_iTeamNum != TEAM_T && ent.m_iTeamNum != TEAM_CT) {
-                continue;
-            }
-            if (ent.m_iTeamNum == myTeam && !Config::AimBot::AttackTeammate)
-                continue;
+    if (!m_mem.Read(localPlayer + Netvar::CBasePlayer::Local::m_aimPunchAngle, &punchAngle)) {
+        LogWait("[FAim/Aim] Failed to read CBasePlayer::Local::m_aimPunchAngle");
+        return;
+    }
 
-            if (ent.m_iHealth < 1) {
-                continue;
-            }
+    if (!m_mem.Read(localPlayer + Netvar::CBaseEntity::index, &localIndex)) {
+        LogWait("[FAim/Aim] Failed to read CBaseEntity::index");
+        return;
+    }
 
-            Vector hitbox;
-            if (!GetBonePosition(pEnt, Config::AimBot::TargetBone, &hitbox)) {
-                continue;
-            }
-            if (Config::AimBot::TargetMode == 0) {
-                float dist = vecEyes.DistTo(hitbox);
-                if (dist < bestVal) {
-                    bestVal = dist;
-                    bestTarget = hitbox;
-                }
-            } else if (Config::AimBot::TargetMode == 1) {
-                float fov = HMath::GetFov(viewAngle, vecEyes, hitbox);
-                if (std::abs(fov) > Config::AimBot::AimFieldOfView) {
-                    continue;
-                }
-                if (fov < bestVal) {
-                    bestVal = fov;
-                    bestTarget = hitbox;
-                }
-            } else if (Config::AimBot::TargetMode == 2) {
-                auto target = HMath::CalcAngle(viewAngle, hitbox);
-                float fov = viewAngle.DistTo(target);
-                if (fov > Config::AimBot::AimFieldOfView) {
-                    continue;
-                }
-                if (fov < bestVal) {
-                    bestVal = fov;
-                    bestTarget = hitbox;
-                }
-            }
+    vecEyes += vecEyesOffset;
+    float bestVal = FLT_MAX;
+    Vector bestTarget(0.f, 0.f, 0.f);
+    for (const auto& x : eng.GetEntityList().Data()) {
+        if (x.second.m_pEntity == 0) {
+            continue;
+        }
+        uintptr_t pEnt = x.second.m_pEntity;
+        CBaseEntity ent;
+        if (!m_mem.Read(x.second.m_pEntity, &ent)) {
+            continue;
+        }
+        if (x.first == localIndex) {
+            continue;
+        }
+        if (ent.m_iTeamNum != TEAM_T && ent.m_iTeamNum != TEAM_CT) {
+            continue;
+        }
+        if (ent.m_iTeamNum == myTeam && !Config::AimBot::AttackTeammate)
+            continue;
+
+        if (ent.m_iHealth < 1) {
+            continue;
         }
 
-        if (bestTarget.x != 0.f) {
-            vecEyes -= bestTarget;
-            vecEyes.NormalizeInPlace();
-            Vector anglesDir = HMath::VectorAngles(vecEyes);
-            Vector clampedDir = HMath::ClampAngle(anglesDir);
-            if (Config::AimBot::RecoilControl) {
-                punchAngle += punchAngle;
+        Vector hitbox;
+        if (!GetBonePosition(pEnt, Config::AimBot::TargetBone, &hitbox)) {
+            continue;
+        }
+        if (Config::AimBot::TargetMode == 0) {
+            float dist = vecEyes.DistTo(hitbox);
+            if (dist < bestVal) {
+                bestVal = dist;
+                bestTarget = hitbox;
             }
-            Vector diffAngles = HMath::ClampAngle(viewAngle - clampedDir + punchAngle);
-            // AimBot rotation speed
-
-            if (Config::AimBot::UseMouseEvents) {
-                float outX = HMath::Clampf(diffAngles.x,
-                                               -Config::AimBot::AimSpeed,
-                                               Config::AimBot::AimSpeed,
-                                               Config::AimBot::AimCorrection);
-                float outY = HMath::Clampf(diffAngles.y,
-                                           -Config::AimBot::AimSpeed,
-                                           Config::AimBot::AimSpeed,
-                                           Config::AimBot::AimCorrection);
-                XTestFakeRelativeMotionEvent(internDpy, (int) outY, -(int) outX, 0);
-            } else {
-                // Don't use correction in memory mode
-                float adjAimSpeed = Config::AimBot::AimSpeed / 6.0f;
-                float outX = HMath::Clampf(diffAngles.x,
-                                           -adjAimSpeed,
-                                           adjAimSpeed,
-                                           1.f);
-                float outY = HMath::Clampf(diffAngles.y,
-                                           -adjAimSpeed,
-                                           adjAimSpeed,
-                                           1.f);
-
-                viewAngle.x -= outX;
-                viewAngle.y -= outY;
-                m_mem.Write(Offset::Engine::ClientState + Offset::Static::ViewAngles, viewAngle);
+        } else if (Config::AimBot::TargetMode == 1) {
+            float fov = HMath::GetFov(viewAngle, vecEyes, hitbox);
+            if (std::abs(fov) > Config::AimBot::AimFieldOfView) {
+                continue;
             }
+            if (fov < bestVal) {
+                bestVal = fov;
+                bestTarget = hitbox;
+            }
+        } else if (Config::AimBot::TargetMode == 2) {
+            auto target = HMath::CalcAngle(viewAngle, hitbox);
+            float fov = viewAngle.DistTo(target);
+            if (fov > Config::AimBot::AimFieldOfView) {
+                continue;
+            }
+            if (fov < bestVal) {
+                bestVal = fov;
+                bestTarget = hitbox;
+            }
+        }
+    }
+
+    if (bestTarget.x != 0.f) {
+        if (Config::AimBot::RecoilControl) {
+            punchAngle += punchAngle;
+        }
+        vecEyes -= bestTarget;
+        vecEyes.NormalizeInPlace();
+        Vector anglesDir = HMath::VectorAngles(vecEyes);
+        Vector clampedDir = HMath::ClampAngle(anglesDir);
+        Vector diffAngles = HMath::ClampAngle(viewAngle - clampedDir + punchAngle);
+
+        float aimSpeed = Config::AimBot::AimSpeed;
+        float aimCorrection = Config::AimBot::AimCorrection;
+        if (!Config::AimBot::UseMouseEvents) {
+            aimSpeed /= 6.f;
+            aimCorrection = 1.f;
+        }
+        Vector out = HMath::ClampAim(diffAngles, aimSpeed, aimCorrection);
+        if (Config::AimBot::UseMouseEvents) {
+            XTestFakeRelativeMotionEvent(internDpy, (int) out.y, -(int) out.x, 0);
             XFlush(internDpy);
+        } else {
+            viewAngle -= out;
+            m_mem.Write(Offset::Engine::ClientState + Offset::Static::ViewAngles, viewAngle);
         }
     }
 }

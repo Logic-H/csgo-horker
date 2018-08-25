@@ -19,23 +19,26 @@ class HMath {
         static Vector CalcAngle(const Vector& localPos, const Vector &targetPos);
         static Vector ClampAngle(const Vector& v);
         static float GetFov(const Vector& eyePos, const Vector& localHeadPos, const Vector& targetHeadPos);
-        static float Clampf(float val, float low, float high, float correction = 0.4f);
+        static Vector ClampAim(Vector v, float max, float correction = 0.4f);
     private:
         static constexpr double PI = 3.14159265358979323846;
         static constexpr double RADPI = 180.0f / PI;
 };
 
-inline float HMath::Clampf(float val, float low, float high, float correction)
+inline Vector HMath::ClampAim(Vector v, float max, float correction)
 {
-    if (val < -correction && val > -1.f)
-        return -1.f;
-    if (val > correction && val < 1.f)
-        return 1.f;
-    if (val < low)
-        return low;
-    if (val > high)
-        return high;
-    return val;
+    for (size_t i = 0; i < 2; ++i) {
+        if (v[i] < -correction && v[i] > -1.f)
+            v[i] = -1.f;
+        else if (v[i] > correction && v[i] < 1.f)
+            v[i] = 1.f;
+        else if (v[i] < -max)
+            v[i] = -max;
+        else if (v[i] > max)
+            v[i] = max;
+    }
+    v.z = 0.f;
+    return v;
 }
 
 inline Vector HMath::CalcAngle(const Vector& localPos, const Vector &targetPos)
