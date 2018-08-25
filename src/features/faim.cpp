@@ -82,7 +82,6 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
     Vector viewAngle;
     Vector punchAngle;
     int localIndex;
-    
     if (!m_mem.Read(localPlayer + Netvar::CBaseEntity::m_vecOrigin, &vecEyes)) {
         LogWait("[FAim/Aim] Failed to read CBaseEntity::m_vecOrigin");
         return;
@@ -111,16 +110,30 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
     vecEyes += vecEyesOffset;
     float bestVal = FLT_MAX;
     Vector bestTarget(0.f, 0.f, 0.f);
-    for (auto x : eng.GetEntityList().Data()) {
-        if (x.second.m_pEntity == 0) {
+    
+    CEntInfo entInfo;
+    if (!m_mem.Read(Offset::Client::EntityList, &entInfo)) {
+        LogWait("[FAim/Aim] Failed to read EntityList");
+        return;
+    }
+
+    bool firstRead = true;
+    
+    while (entInfo.m_pNext != NULL) {
+        if (!firstRead) {
+            if (!m_mem.Read(entInfo.m_pNext, &entInfo)) {
+                LogWait("[FAim/Aim] Failed to read EntityList");
+            }
+        }
+        firstRead = false;
+        if (entInfo.m_pEntity == 0) {
             continue;
         }
-        uintptr_t pEnt = x.second.m_pEntity;
         CBaseEntity ent;
-        if (!m_mem.Read(x.second.m_pEntity, &ent)) {
+        if (!m_mem.Read(entInfo.m_pEntity, &ent)) {
             continue;
         }
-        if (x.first == localIndex) {
+        if (ent.index == localIndex) {
             continue;
         }
         if (ent.m_iTeamNum != TEAM_T && ent.m_iTeamNum != TEAM_CT) {
@@ -134,7 +147,8 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
         }
 
         Vector hitbox;
-        if (!GetBonePosition(pEnt, Config::AimBot::TargetBone, &hitbox)) {
+        if (!GetBonePosition(entInfo.m_pEntity, Config::AimBot::TargetBone, &hitbox)) {
+            Log("Bone position failure");
             continue;
         }
         if (Config::AimBot::TargetMode == 0) {
