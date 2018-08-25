@@ -16,6 +16,7 @@ To enable this, you will need to set "TriggerKey" to "Mouse1", "Mouse2", or "Mou
 ##### TODO
 * Code base is starting to get.... messy?  I need to focus on cleaning this up when I get time.
 * Implement more features.
+* Error margin for recoil control so its less.... suspicious
 
 ### Compiling
 ##### Clone the repository
