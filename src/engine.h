@@ -17,7 +17,7 @@ class Engine final {
         bool IsConnected();
 
         // Entity List
-        const CBaseEntityList &GetEntityList() const;
+        CBaseEntityList GetEntityList();
         bool GetEntityById(int id, CBaseEntity* ent);
         bool GetEntityPtrById(int id, uintptr_t* out);
 

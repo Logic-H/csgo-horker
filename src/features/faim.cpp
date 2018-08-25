@@ -111,7 +111,7 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
     vecEyes += vecEyesOffset;
     float bestVal = FLT_MAX;
     Vector bestTarget(0.f, 0.f, 0.f);
-    for (const auto& x : eng.GetEntityList().Data()) {
+    for (auto x : eng.GetEntityList().Data()) {
         if (x.second.m_pEntity == 0) {
             continue;
         }
@@ -234,7 +234,6 @@ void FAim::Run() {
             this->Recoil(localPlayer, !triggerOn);
         }
 
-        // AIMBOT START
         if (Config::AimBot::AimAssist && triggerOn) {
             this->Aim(localPlayer, myTeam);
         }

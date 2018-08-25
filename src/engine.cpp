@@ -21,8 +21,9 @@ void Engine::SetProcessManager(Process *proc)
     m_proc = proc;
 }
 
-const CBaseEntityList &Engine::GetEntityList() const
+CBaseEntityList Engine::GetEntityList()
 {
+    std::lock_guard<std::mutex> guard(m_entitymutex);
     return this->m_entitylist;
 }
 
