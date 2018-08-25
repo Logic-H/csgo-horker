@@ -75,6 +75,9 @@ inline float VectorLength(const Vector& v)
 
 inline Vector::Vector(void)
 {
+    this->x = 0.f;
+    this->y = 0.f;
+    this->z = 0.f;
 }
 
 inline Vector::Vector(float ix, float iy, float iz)

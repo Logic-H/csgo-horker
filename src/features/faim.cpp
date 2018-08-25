@@ -76,12 +76,12 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
 
     m_nLastTick = tickClock;
 
-    auto &eng = Engine::GetInstance();
     Vector vecEyes;
     Vector vecEyesOffset;
     Vector viewAngle;
     Vector punchAngle;
     int localIndex;
+
     if (!m_mem.Read(localPlayer + Netvar::CBaseEntity::m_vecOrigin, &vecEyes)) {
         LogWait("[FAim/Aim] Failed to read CBaseEntity::m_vecOrigin");
         return;
@@ -109,7 +109,7 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
 
     vecEyes += vecEyesOffset;
     float bestVal = FLT_MAX;
-    Vector bestTarget(0.f, 0.f, 0.f);
+    Vector bestTarget;
     
     CEntInfo entInfo;
     if (!m_mem.Read(Offset::Client::EntityList, &entInfo)) {
@@ -148,7 +148,6 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
 
         Vector hitbox;
         if (!GetBonePosition(entInfo.m_pEntity, Config::AimBot::TargetBone, &hitbox)) {
-            Log("Bone position failure");
             continue;
         }
         if (Config::AimBot::TargetMode == 0) {
