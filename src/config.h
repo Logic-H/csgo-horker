@@ -23,6 +23,7 @@ namespace Config {
 
     namespace Glow {
         extern bool  Enabled;
+        extern bool  Radar;
         extern bool  LegitGlow;
         extern bool  GlowAllies;
         extern bool  GlowEnemies;

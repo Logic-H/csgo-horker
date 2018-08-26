@@ -7,6 +7,15 @@
 
 typedef struct GlowObjectDefinition_t glow_t;
 
+void FGlow::Radar(uintptr_t entPtr, int lTeam, int rTeam)
+{
+    if (rTeam == TEAM_T || rTeam == TEAM_CT) {
+        if (rTeam != lTeam) {
+            m_mem.Write(entPtr + Netvar::CBasePlayer::m_bSpotted, true);
+        }
+    }
+}
+
 void FGlow::Run()
 {
     if (!Config::Glow::Enabled) {
@@ -40,9 +49,13 @@ void FGlow::Run()
     Log("[FGlow] Started");
 
     while (!ShouldStop()) {
-        std::array<struct iovec, 1024> g_remote = {};
-        std::array<struct iovec, 1024> g_local = {};
-        std::array<glow_t, 1024> g_glow = {};
+        struct iovec g_local[1024];
+        struct iovec g_remote[1024];
+        glow_t g_glow[1024];
+
+        memset(g_local, 0, sizeof(g_local));
+        memset(g_remote, 0, sizeof(g_remote));
+        memset(g_glow, 0, sizeof(g_glow));
 
         if (!m_mem.Read(Offset::Client::GlowObjectManager, &manager)) {
             LogWait("[Glow] Failed to read GlowObjectManager");
@@ -52,7 +65,7 @@ void FGlow::Run()
         const size_t count = manager.Count();
         const uintptr_t aGlowData = manager.Data();
 
-        if (!m_mem.Read(aGlowData, g_glow.data(), sizeof(glow_t) * count)) {
+        if (!m_mem.Read(aGlowData, g_glow, sizeof(glow_t) * count)) {
             LogWait("[Glow] Failed to read m_GlowObjectDefinitions");
             continue;
         }
@@ -69,7 +82,7 @@ void FGlow::Run()
             Wait();
             continue;
         }
-        
+
         size_t writeCount = 0;
         for (size_t i = 0; i < count; ++i) {
             if (g_glow[i].m_pEntity == 0)
@@ -80,6 +93,11 @@ void FGlow::Run()
             if (bLegitGlow) {
                 g_glow[i].m_nGlowStyle = 2;
             }
+
+            if (Config::Glow::Radar) {
+                this->Radar(g_glow[i].m_pEntity, myTeam, ent.m_iTeamNum);
+            }
+
             switch(ent.m_iTeamNum) {
                 case TEAM_SPEC:
                 case TEAM_NONE:
@@ -113,7 +131,7 @@ void FGlow::Run()
 
             writeCount++;
         }
-        m_mem.WriteMulti(g_local.data(), g_remote.data(), writeCount);
+        m_mem.WriteMulti(g_local, g_remote, writeCount);
         WaitMs(2);
     }
     Log("[FGlow] Stopped");

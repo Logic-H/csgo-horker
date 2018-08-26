@@ -9,4 +9,6 @@ class FGlow final : public FBase {
         FGlow(Process &mem) : m_mem(mem) {};
     protected:
         void Run();
+    private:
+        void Radar(uintptr_t entPtr, int lTeam, int rTeam);
 };

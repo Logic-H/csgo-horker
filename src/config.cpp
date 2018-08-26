@@ -8,6 +8,7 @@
 constexpr char defConfigFile[] = "config.ini";
 
 bool  Config::Glow::Enabled   = true;
+bool  Config::Glow::Radar     = true;
 bool  Config::Glow::LegitGlow = false;
 bool  Config::Glow::GlowAllies = true;
 bool  Config::Glow::GlowEnemies = true;
@@ -92,6 +93,7 @@ void UpdateConfig()
 
         WriteSection(Glow);
         WritePair(Glow, Enabled);
+        WritePair(Glow, Radar);
         WritePair(Glow, LegitGlow);
         WritePair(Glow, GlowAllies);
         WritePair(Glow, GlowEnemies);
@@ -150,6 +152,7 @@ bool ReadConfig(const std::string &configFile)
     RCBOOL(AimBot, AttackTeammate);
 
     RCBOOL(Glow, Enabled);
+    RCBOOL(Glow, Radar);
     RCBOOL(Glow, LegitGlow);
     RCBOOL(Glow, GlowAllies);
     RCBOOL(Glow, GlowEnemies);
