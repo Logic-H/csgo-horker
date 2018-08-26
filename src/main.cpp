@@ -91,7 +91,9 @@ int main()
     FGlow fglow(proc);
     FVisual fvisual(proc);
 
-    HWCtrl::SetContrast(Config::Visual::Contrast);
+    if (Config::Visual::Contrast != 0) {
+        HWCtrl::SetContrast(Config::Visual::Contrast);
+    }
 
     while (!shouldQuit) {
         if (!proc.IsValid()) {
@@ -123,6 +125,8 @@ int main()
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     Helper::Finalize();
-    HWCtrl::SetContrast(0);
+    if (Config::Visual::Contrast != 0) {
+        HWCtrl::SetContrast(0);
+    }
     return 0;
 }
