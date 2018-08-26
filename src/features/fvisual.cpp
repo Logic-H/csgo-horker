@@ -15,6 +15,12 @@ void FVisual::Run()
             continue;
         }
 
+        if (Config::Visual::DisablePostProcessing) {
+            if ((m_nLoopCount % 300) == 0) {
+                m_mem.Write(Offset::Client::PostProcessing, true);
+            }
+        }
+
         if (Config::Visual::NoFlash) {
             float fDuration;
             if (!m_mem.Read(localPlayer + Netvar::CBasePlayer::m_flFlashDuration, &fDuration)) {
@@ -25,6 +31,7 @@ void FVisual::Run()
                 m_mem.Write(localPlayer + Netvar::CBasePlayer::m_flFlashDuration, 0.f);
             }
         }
+        m_nLoopCount++;
         WaitMs(20);
     }
     Log("[FVisual] Stopped");

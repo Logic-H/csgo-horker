@@ -41,6 +41,7 @@ namespace Config {
 
     namespace Visual {
         extern bool NoFlash;
+        extern bool DisablePostProcessing;
         extern int  Contrast;
     };
 };

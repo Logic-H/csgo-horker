@@ -16,6 +16,7 @@ namespace Offset {
         extern uintptr_t LocalPlayer;
         extern uintptr_t GlowObjectManager;
         extern uintptr_t PlayerResources;
+        extern uintptr_t PostProcessing;
     };
     namespace Engine {
         extern uintptr_t ClientState;

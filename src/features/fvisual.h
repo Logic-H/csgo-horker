@@ -9,4 +9,5 @@ class FVisual final : public FBase {
         FVisual(Process &mem) : m_mem(mem) {};
     protected:
         void Run();
+        size_t m_nLoopCount = 0;
 };
