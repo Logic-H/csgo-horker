@@ -45,7 +45,7 @@ namespace Netvar {
     namespace CBasePlayer {
         constexpr size_t m_bSpotted = 0xECD;
         constexpr size_t m_Local = 0x36f0;
-        constexpr size_t m_flFlashDuration = 0xABE8;
+        constexpr size_t m_flFlashDuration = 0xabf8;
         constexpr size_t m_iCrosshairID = 0xBBD0;
         namespace Local {
             constexpr size_t m_aimPunchAngle = m_Local + 0x74;
