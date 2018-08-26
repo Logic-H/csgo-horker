@@ -35,6 +35,9 @@ find_path(NVCtrlLib_INCLUDE_DIR NVCtrlLib.h /usr/include/NVCtrl
 
 if(NVCtrlLib_LIBRARY AND NVCtrlLib_INCLUDE_DIR)
     set(NVCtrlLib_FOUND true)
+else()
+    set(NVCtrlLib_INCLUDE_DIR "")
+    set(NVCtrlLib_LIBRARY "")
 endif()
 
 if (NVCtrlLib_FOUND)
