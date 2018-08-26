@@ -7,6 +7,7 @@ A simple CSGO Linux external hack.
 * Disable Post Processing
 * Glow
 * NoFlash
+* Radar
 * Recoil Control
 * Trigger
 
