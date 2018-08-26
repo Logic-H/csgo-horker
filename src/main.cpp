@@ -9,6 +9,7 @@
 #include "engine.h"
 #include "globals.h"
 #include "helper.h"
+#include "hwctrl.h"
 #include "offsets.h"
 #include "process.h"
 
@@ -90,6 +91,8 @@ int main()
     FGlow fglow(proc);
     FVisual fvisual(proc);
 
+    HWCtrl::SetContrast(Config::Visual::Contrast);
+
     while (!shouldQuit) {
         if (!proc.IsValid()) {
             shouldQuit = true;
@@ -120,5 +123,6 @@ int main()
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     Helper::Finalize();
+    HWCtrl::SetContrast(0);
     return 0;
 }

@@ -24,6 +24,7 @@ float Config::Glow::AllyB     = 0.8f;
 float Config::Glow::AllyA     = 0.8f;
 
 bool  Config::Visual::NoFlash = true;
+int   Config::Visual::Contrast = 0;
 
 bool  Config::AimBot::AimAssist = true;
 float Config::AimBot::AimCorrection = 0.4f;
@@ -106,7 +107,10 @@ void UpdateConfig()
         WriteSectionEnd();
 
         WriteSection(Visual);
+        WriteComment("Disable flashbang visual effect");
         WritePair(Visual, NoFlash);
+        WriteComment("Adjust the contrast/vibrance of textures (Nvidia only for now) Values: -1024 - 1023");
+        WritePair(Visual, Contrast)
         conf.close();
     }
 }
@@ -158,6 +162,7 @@ bool ReadConfig(const std::string &configFile)
     RCDBL (Glow, AllyA);
 
     RCBOOL(Visual, NoFlash);
+    RCINT(Visual, Contrast);
     UpdateConfig();
     return true;
 }

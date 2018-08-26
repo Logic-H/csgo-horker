@@ -7,6 +7,7 @@ A simple CSGO Linux external hack.
 * NoFlash
 * Trigger
 * Recoil Control
+* Automated Contrast/Digital Vibrance control (Nvidia only for now)
 
 ##### Mouse button support
 There is also mouse button support as of commit cdc56a4.  The only known bug at this time is it doesn't register until after the first shot, which is mostly because I was too lazy to do it via Alt1 for now.
@@ -19,6 +20,12 @@ To enable this, you will need to set "TriggerKey" to "Mouse1", "Mouse2", or "Mou
 * Error margin for recoil control so its less.... suspicious
 
 ### Compiling
+
+##### Build requirements
+Current build requirements are as follows:
+* X11
+* libXNVCtrl (Optional for automated contrast control with Nvidia drivers)
+
 ##### Clone the repository
 ```bash
 git clone https://github.com/Teklad/csgo-horker.git
