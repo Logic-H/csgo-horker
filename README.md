@@ -3,11 +3,12 @@ A simple CSGO Linux external hack.
 
 ### Current Features
 * AimBot (experimental)
+* Automated Contrast/Digital Vibrance control (Nvidia only for now)
+* Disable Post Processing
 * Glow
 * NoFlash
-* Trigger
 * Recoil Control
-* Automated Contrast/Digital Vibrance control (Nvidia only for now)
+* Trigger
 
 ##### Mouse button support
 There is also mouse button support as of commit cdc56a4.  The only known bug at this time is it doesn't register until after the first shot, which is mostly because I was too lazy to do it via Alt1 for now.
