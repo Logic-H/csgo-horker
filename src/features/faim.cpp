@@ -166,7 +166,7 @@ void FAim::Aim(uintptr_t localPlayer, int myTeam)
                 bestTarget = hitbox;
             }
         } else if (Config::AimBot::TargetMode == 2) {
-            auto target = HMath::CalcAngle(viewAngle, hitbox);
+            auto target = HMath::CalcAngle(vecEyes, hitbox);
             float fov = viewAngle.DistTo(target);
             if (fov > Config::AimBot::AimFieldOfView) {
                 continue;
