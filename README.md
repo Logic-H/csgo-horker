@@ -1,4 +1,4 @@
-# Horker
+# csgo 国服/steam 辅助
 A simple CSGO Linux external hack.
 
 ### Current Features
